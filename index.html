@@ -236,7 +236,7 @@ tr.repeat-row:hover{background:linear-gradient(90deg,rgba(255,107,125,.24),rgba(
     <div class="panel-body"><div class="chart-wrap small"><canvas id="topChart"></canvas></div></div>
   </section>
 
-  <section class="table-card glass">
+  <section id="playerAnalysisSection" class="table-card glass">
     <div class="panel-head"><div><h3 class="panel-title">Player Event Analysis</h3><p class="panel-desc">Left players stay visible and keep their previous history. Returned players reconnect to old performance data.</p></div><div class="chip">Click Player</div></div>
     <div class="table-wrap">
       <table>
@@ -507,7 +507,7 @@ document.getElementById('statusFilter').addEventListener('change',render);
 document.getElementById('lifeFilter').addEventListener('change',render);
 document.getElementById('actionFilter').addEventListener('change',render);
 document.getElementById('resetFilters').addEventListener('click',()=>{['searchInput','gFilter','statusFilter','lifeFilter','actionFilter'].forEach(id=>document.getElementById(id).value='');activeOnlyMode=false;document.getElementById('memberViewBtn').textContent='Show Active Only';render()});
-document.getElementById('memberViewBtn').addEventListener('click',()=>{activeOnlyMode=!activeOnlyMode;document.getElementById('memberViewBtn').textContent=activeOnlyMode?'Show All Players':'Show Active Only';render()});
+document.getElementById('memberViewBtn').addEventListener('click',()=>{activeOnlyMode=!activeOnlyMode;document.getElementById('memberViewBtn').textContent=activeOnlyMode?'View Player Analysis ↓':'Show Active Only';render()});
 document.getElementById('prevBtn').addEventListener('click',()=>{const i=events.indexOf(selectedEvent);if(i>0){selectedEvent=events[i-1];document.getElementById('eventSelect').value=selectedEvent;render()}});
 document.getElementById('nextBtn').addEventListener('click',()=>{const i=events.indexOf(selectedEvent);if(i<events.length-1){selectedEvent=events[i+1];document.getElementById('eventSelect').value=selectedEvent;render()}});
 document.getElementById('modalClose').addEventListener('click',closeModal);
