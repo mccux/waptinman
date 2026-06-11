@@ -162,7 +162,7 @@ tr.repeat-row:hover{background:linear-gradient(90deg,rgba(255,107,125,.24),rgba(
         <p>Historical Tinman performance analysis for WAP. Track player contributions against G-level targets, identify repeat offenders, monitor compliance trends, and preserve complete player history. Members are automatically classified as <strong>New, Existing, Left, or Returned</strong>, providing leadership with a comprehensive view of participation, accountability, and long-term performance.</p>
       </div>
       <div class="hero-side">
-        <div class="mini"><div class="mini-label">Executive View</div><div class="mini-value" id="execHealth">Loading...</div></div>
+        <div class="mini"><div class="mini-label">Executive View</div><div class="mini-value" id="execHealth">Loading...</div><div class="mini-note" id="execHealthNote">Awaiting event analysis...</div></div>
         <div class="mini"><div class="mini-label">Data Source</div><div class="mini-value">WAP Tinman Historical Database</div><div class="mini-note">Performance, compliance, and lifecycle analytics</div></div>
         <div class="mini"><div class="mini-label">Latest Total</div><div class="mini-value" id="heroTotal">Loading...</div></div>
         <div class="mini"><div class="mini-label">Compliance</div><div class="mini-value" id="heroCompliance">Loading...</div></div>
@@ -495,7 +495,12 @@ function updateSummary(active,view,total,comp,repeat3Count){
   let health='Healthy', badge='Healthy', cls='met', action='Maintain Momentum';
   if(comp<55 || repeat3Count>0){health='Needs Attention'; badge='Action Required'; cls='action'; action='Repeat Offender Review Required'}
   else if(comp<70){health='Moderate Risk'; badge='Monitor'; cls='watch'; action='Coach Below-Target Players'}
-  set('execHealth',health); set('summaryHealth',health); set('summaryBadge',badge); document.getElementById('summaryBadge').className='badge '+cls;
+  set('execHealth',health);
+  const execNote = repeat3Count>0
+    ? `${repeat3Count} repeat offender(s) require leadership review.`
+    : (comp<70 ? `Compliance is ${comp}%; coaching is recommended.` : `Compliance is stable at ${comp}%.`);
+  set('execHealthNote',execNote);
+  set('summaryHealth',health); set('summaryBadge',badge); document.getElementById('summaryBadge').className='badge '+cls;
   set('summaryAction',action);
   set('summaryNarrative',`Selected event compliance is ${comp}% with ${active.length} active players and ${format(total)} total points. Movement shows ${newCount} new, ${returned} returned, and ${left} left players.`);
   set('summaryActionText',repeat3Count>0?`${repeat3Count} player(s) have missed their required Tinman contribution target for three consecutive events. Review these members to understand participation challenges, reinforce expectations, and determine appropriate support or corrective action.`:'No 3-event repeat offenders on this selected date. Continue monitoring the 2-event watchlist to prevent recurring underperformance.');
