@@ -121,6 +121,13 @@ tr.repeat-row:hover{background:linear-gradient(90deg,rgba(255,107,125,.24),rgba(
 @media(max-width:1450px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.filter-grid{grid-template-columns:1fr 1fr 1fr}.status-strip{grid-template-columns:1fr 1fr}.summary-grid,.two-grid,.three-grid{grid-template-columns:1fr}}
 @media(max-width:900px){.hero-grid{grid-template-columns:1fr}.history-kpis{grid-template-columns:1fr 1fr}.hero-side{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){.kpi-grid,.hero-side,.status-strip,.filter-grid,.history-kpis{grid-template-columns:1fr}.hero h1{font-size:30px}.simple-list li{grid-template-columns:1fr}.compact-score{text-align:left}}
+
+#searchBtn,#clearSearchBtn{flex:0 0 auto}
+@media(max-width:700px){
+  #searchInput{min-width:0}
+  #searchBtn,#clearSearchBtn{width:auto!important;min-width:80px}
+}
+
 </style>
 </head>
 <body>
@@ -186,7 +193,11 @@ tr.repeat-row:hover{background:linear-gradient(90deg,rgba(255,107,125,.24),rgba(
     <div class="filter-grid">
       <div class="field"><label>Event</label><button class="button" id="prevBtn">← Previous</button></div>
       <div class="field"><label for="eventSelect">Event Date</label><select class="select" id="eventSelect"></select></div>
-      <div class="field"><label for="searchInput">Search Player</label><input class="input" id="searchInput" placeholder="Type player name"></div>
+      <div class="field"><label for="searchInput">Search Player</label><div style="display:flex;gap:8px">
+          <input class="input" id="searchInput" placeholder="Search player...">
+          <button class="button" id="searchBtn" style="width:110px">Search</button>
+          <button class="button" id="clearSearchBtn" style="width:90px">Clear</button>
+        </div></div>
       <div class="field"><label for="gFilter">G Level</label><select class="select" id="gFilter"><option value="">All G Levels</option></select></div>
       <div class="field"><label for="statusFilter">Target Status</label><select class="select" id="statusFilter"><option value="">All Status</option><option>Met Target</option><option>Below Target</option><option>No Participation</option></select></div>
       <div class="field"><label for="lifeFilter">Lifecycle</label><select class="select" id="lifeFilter"><option value="">All Lifecycle</option><option>New</option><option>Existing</option><option>Returned</option><option>Left</option></select></div>
@@ -195,7 +206,7 @@ tr.repeat-row:hover{background:linear-gradient(90deg,rgba(255,107,125,.24),rgba(
     <div class="filter-grid" style="grid-template-columns:1fr 1fr 1fr;margin-top:12px">
       <div class="field"><label for="actionFilter">Action Filter</label><select class="select" id="actionFilter"><option value="">All Players</option><option value="repeat3">3x Repeat Offenders</option><option value="watch2">2x Watchlist</option><option value="movement">New / Left / Returned</option></select></div>
       <div class="field"><label>Reset Filters</label><button class="button" id="resetFilters">Clear Filters</button></div>
-      <div class="field"><label>Member Friendly View</label><button class="button" id="memberViewBtn">Show Active Only</button></div>
+      <div class="field"><label>Player Analysis</label><button class="button" id="memberViewBtn">View Player Analysis ↓</button></div>
     </div>
   </section>
 
@@ -502,12 +513,31 @@ async function load(){
 }
 document.getElementById('eventSelect').addEventListener('change',e=>{selectedEvent=e.target.value;render()});
 document.getElementById('searchInput').addEventListener('input',render);
+document.getElementById('searchInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    render();
+    const section=document.getElementById('playerAnalysisSection');
+    if(section){section.scrollIntoView({behavior:'smooth',block:'start'});}
+  }
+});
 document.getElementById('gFilter').addEventListener('change',render);
 document.getElementById('statusFilter').addEventListener('change',render);
 document.getElementById('lifeFilter').addEventListener('change',render);
 document.getElementById('actionFilter').addEventListener('change',render);
-document.getElementById('resetFilters').addEventListener('click',()=>{['searchInput','gFilter','statusFilter','lifeFilter','actionFilter'].forEach(id=>document.getElementById(id).value='');activeOnlyMode=false;document.getElementById('memberViewBtn').textContent='Show Active Only';render()});
-document.getElementById('memberViewBtn').addEventListener('click',()=>{activeOnlyMode=!activeOnlyMode;document.getElementById('memberViewBtn').textContent=activeOnlyMode?'View Player Analysis ↓':'Show Active Only';render()});
+document.getElementById('resetFilters').addEventListener('click',()=>{['searchInput','gFilter','statusFilter','lifeFilter','actionFilter'].forEach(id=>document.getElementById(id).value='');activeOnlyMode=false;document.getElementById('memberViewBtn').textContent='View Player Analysis ↓';render()});
+document.getElementById('memberViewBtn').addEventListener('click',()=>{
+  const section=document.getElementById('playerAnalysisSection');
+  if(section){section.scrollIntoView({behavior:'smooth',block:'start'});}
+});
+document.getElementById('searchBtn').addEventListener('click',()=>{
+  render();
+  const section=document.getElementById('playerAnalysisSection');
+  if(section){section.scrollIntoView({behavior:'smooth',block:'start'});}
+});
+document.getElementById('clearSearchBtn').addEventListener('click',()=>{
+  document.getElementById('searchInput').value='';
+  render();
+});
 document.getElementById('prevBtn').addEventListener('click',()=>{const i=events.indexOf(selectedEvent);if(i>0){selectedEvent=events[i-1];document.getElementById('eventSelect').value=selectedEvent;render()}});
 document.getElementById('nextBtn').addEventListener('click',()=>{const i=events.indexOf(selectedEvent);if(i<events.length-1){selectedEvent=events[i+1];document.getElementById('eventSelect').value=selectedEvent;render()}});
 document.getElementById('modalClose').addEventListener('click',closeModal);
