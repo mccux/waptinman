@@ -288,7 +288,7 @@ let rows=[], events=[], selectedEvent=null, allPlayers=[], trendChart=null, topC
 let activeOnlyMode=false;
 
 function parseCSVLine(line){const out=[];let cur='',q=false;for(let i=0;i<line.length;i++){const c=line[i],n=line[i+1];if(c==='"'&&q&&n==='"'){cur+='"';i++}else if(c==='"'){q=!q}else if(c===','&&!q){out.push(cur);cur=''}else cur+=c}out.push(cur);return out}
-function parseCSV(text){const lines=text.trim().split(/\r?\n/).filter(Boolean);if(!lines.length)return[];const heads=parseCSVLine(lines[0]).map(x=>x.trim());return lines.slice(1).map(line=>{const vals=parseCSVLine(line);const r={};heads.forEach((h,i)=>r[h]=(vals[i]||'').trim());return r})}
+function parseCSV(text){const lines=text.trim().split(/\r?\n/).filter(Boolean);if(!lines.length)return[];const heads=parseCSVLine(lines[0]).map(x=>x.replace(/^\uFEFF/,'').trim());return lines.slice(1).map(line=>{const vals=parseCSVLine(line);const r={};heads.forEach((h,i)=>r[h]=(vals[i]||'').trim());return r})}
 function num(v){return Number(String(v||'0').replace(/,/g,''))||0}
 function safe(v){return String(v??'').trim()}
 function format(n){n=Number(n)||0;if(n>=1e9)return(n/1e9).toFixed(2).replace(/\.00$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(2).replace(/\.00$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace(/\.0$/,'')+'K';return n.toLocaleString()}
@@ -306,7 +306,7 @@ function actionClass(streak){if(streak>=3)return 'action';if(streak===2)return '
 
 function normalize(){
   rows=rows.map(r=>({
-    date:safe(r['Event Date']||r.EventDate||r.Date),
+    date:safe(r['Event Date']||r.EventDate||r['\uFEFFEventDate']||r.Date),
     rank:num(r.Rank),
     player:safe(r.Player||r.Name),
     g:safe(r['G Level']||r.GLevel||r.G)||'Unknown',
