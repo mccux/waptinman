@@ -3,619 +3,82 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>WAP Tinman Performance Dashboard</title>
+<title>WAP Member Contribution Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root{
-  --bg:#100814;--panel:rgba(36,18,48,.74);--stroke:rgba(255,255,255,.11);
-  --text:#fff7ff;--muted:#cdb8db;--green:#35d28a;--red:#ff6b7d;
-  --amber:#facc15;--purple:#a855f7;--blue:#c084fc;--shadow:0 18px 45px rgba(0,0,0,.32);
-  --radius:22px
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;font-family:Inter,sans-serif;color:var(--text);
-  background:radial-gradient(circle at top left,rgba(192,132,252,.14),transparent 24%),
-  radial-gradient(circle at top right,rgba(53,210,138,.10),transparent 24%),
-  linear-gradient(135deg,#120817,#1b0f25 42%,#2b1535 100%);
-  min-height:100vh
-}
-.container{width:min(1600px,calc(100% - 20px));margin:auto;padding:12px 0 42px}
-.glass{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));border:1px solid var(--stroke);box-shadow:var(--shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.topbar,.hero,.filters,.panel,.table-card,.list-card,.summary-card{border-radius:var(--radius);margin-bottom:12px}
-.topbar{padding:12px}
-.topbar-inner,.panel-head,.filters-head,.summary-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.brand{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke);background:rgba(255,255,255,.07);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
-.dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));box-shadow:0 0 16px rgba(168,85,247,.8)}
-.status-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;flex:1 1 760px}
-.pill{padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--stroke);font-size:12px;color:#f4e8ff;line-height:1.45}
-.home-btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:white;font-weight:900;min-height:42px;padding:0 16px;border-radius:14px;background:linear-gradient(135deg,rgba(192,132,252,.24),rgba(168,85,247,.18));border:1px solid rgba(192,132,252,.28)}
-.hero{padding:22px;overflow:hidden}
-.hero-grid{display:grid;grid-template-columns:1.65fr .85fr;gap:16px}
-.hero h1{margin:10px 0 8px;font-size:clamp(30px,4vw,52px);line-height:1.02;letter-spacing:-.05em}
-.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.7;max-width:900px}
-.hero-side{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.mini,.kpi{border-radius:18px;background:rgba(255,255,255,.05);border:1px solid var(--stroke);padding:14px}
-.mini-label,.kpi-label{font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.06em}
-.mini-value{font-size:18px;font-weight:900;margin-top:10px}
-.filters{padding:16px}
-.section-title,.panel-title{margin:0;font-size:18px;font-weight:900}
-.section-subtitle,.panel-desc{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
-.filter-grid{display:grid;grid-template-columns:140px 210px minmax(240px,1fr) 155px 175px 170px 140px;gap:12px;align-items:end;margin-top:12px}
-.field label{display:block;font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-.input,.select,.button{width:100%;min-height:46px;border-radius:14px;border:1px solid var(--stroke);background:rgba(255,255,255,.05);color:#fff;padding:0 14px;font-family:inherit;outline:none}
-.select option{background:#2b1535;color:#fff}
-.button{cursor:pointer;font-weight:900;background:linear-gradient(135deg,rgba(192,132,252,.22),rgba(168,85,247,.18));transition:.2s}
-.button:hover{transform:translateY(-1px)}
-.button:disabled{opacity:.45;cursor:not-allowed;transform:none}
-.summary-card{padding:16px 18px}
-.summary-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:12px}
-.summary-box{border:1px solid var(--stroke);background:rgba(255,255,255,.04);border-radius:18px;padding:14px}
-.summary-title{font-size:13px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-.summary-main{font-size:24px;font-weight:900;letter-spacing:-.03em}
-.summary-text{color:#f0e6ff;font-size:13px;line-height:1.65;margin-top:8px}
-.kpi-grid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:12px;margin-bottom:12px}
-.kpi{min-height:118px;overflow:hidden}
-.kpi.blue{background:linear-gradient(180deg,rgba(88,28,135,.70),rgba(59,7,100,.78))}
-.kpi.green{background:linear-gradient(180deg,rgba(26,77,65,.66),rgba(14,38,36,.78))}
-.kpi.red{background:linear-gradient(180deg,rgba(95,34,48,.68),rgba(43,17,24,.80))}
-.kpi.gold{background:linear-gradient(180deg,rgba(92,67,28,.66),rgba(40,30,15,.80))}
-.kpi.purple{background:linear-gradient(180deg,rgba(79,50,140,.70),rgba(36,22,70,.82))}
-.kpi-value{font-size:clamp(19px,2vw,34px);line-height:1;font-weight:900;letter-spacing:-.05em;margin:13px 0 8px}
-.kpi-note{color:var(--muted);font-size:11px;line-height:1.45;font-weight:700}
-.panel{overflow:hidden}
-.panel-head{padding:16px 18px 0}
-.chip{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--stroke);background:rgba(255,255,255,.06);font-size:11px;font-weight:900;color:#f0e6ff}
-.panel-body{padding:14px 18px 18px}
-.chart-wrap{height:330px;border-radius:18px;border:1px solid var(--stroke);background:rgba(255,255,255,.03);padding:10px}
-.chart-wrap.small{height:310px}
-.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.three-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
-.table-wrap{overflow:auto;border-top:1px solid var(--stroke);max-height:680px}
-table{width:100%;border-collapse:collapse;min-width:1500px}
-thead th{position:sticky;top:0;z-index:2;background:#251332;color:#f3e8ff;font-size:11px;text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.14);white-space:nowrap}
-tbody td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;white-space:nowrap;vertical-align:middle}
-tbody tr:hover{background:rgba(255,255,255,.04)}
-tr.repeat-row{background:linear-gradient(90deg,rgba(255,107,125,.18),rgba(255,107,125,.03))}
-tr.repeat-row:hover{background:linear-gradient(90deg,rgba(255,107,125,.24),rgba(255,107,125,.06))}
-.name-wrap{display:flex;align-items:center;gap:10px}
-.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900;background:linear-gradient(135deg,var(--blue),var(--purple));flex:0 0 36px}
-.player-link{cursor:pointer;font-weight:800}
-.player-link:hover{color:#e9d5ff}
-.badge{display:inline-flex;align-items:center;justify-content:center;min-height:24px;padding:0 10px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.04em;border:1px solid transparent}
-.met{color:#9ff0c7;background:rgba(53,210,138,.14);border-color:rgba(53,210,138,.24)}
-.fail{color:#ffb6c0;background:rgba(255,107,125,.12);border-color:rgba(255,107,125,.24)}
-.zero{color:#d8c4ff;background:rgba(139,92,246,.14);border-color:rgba(139,92,246,.24)}
-.new{color:#ffe68a;background:rgba(250,204,21,.14);border-color:rgba(250,204,21,.24)}
-.exist{color:#9ff0c7;background:rgba(53,210,138,.14);border-color:rgba(53,210,138,.24)}
-.left{color:#ffb6c0;background:rgba(255,107,125,.12);border-color:rgba(255,107,125,.24)}
-.returned{color:#e9d5ff;background:rgba(192,132,252,.14);border-color:rgba(192,132,252,.24)}
-.action{color:#ffdde3;background:rgba(255,107,125,.18);border-color:rgba(255,107,125,.35);box-shadow:0 0 18px rgba(255,107,125,.12)}
-.watch{color:#ffe68a;background:rgba(250,204,21,.14);border-color:rgba(250,204,21,.24)}
-.metric-pos{color:#61e29d;font-weight:900}
-.metric-neg{color:#ff7f8f;font-weight:900}
-.metric-flat,.metric-none{color:#ffd978;font-weight:900}
-.list-body{padding:14px 16px 16px}
-.simple-list{list-style:none;margin:0;padding:0}
-.simple-list li{display:grid;grid-template-columns:minmax(0,1fr) 120px 160px;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}
-.compact-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.compact-score{text-align:right;font-weight:900}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(9,4,13,.74);backdrop-filter:blur(8px);z-index:2000;padding:16px}
-.modal.show{display:flex}
-.modal-card{width:min(1160px,100%);max-height:90vh;overflow:hidden;border-radius:24px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(40,21,51,.98),rgba(23,12,31,.98));box-shadow:0 24px 60px rgba(0,0,0,.45)}
-.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px 12px;border-bottom:1px solid rgba(255,255,255,.08)}
-.modal-title{margin:0;font-size:24px;font-weight:900}
-.modal-sub{margin:6px 0 0;color:var(--muted);font-size:13px}
-.modal-close{min-width:42px;height:42px;border:none;border-radius:12px;cursor:pointer;font-size:22px;font-weight:900;color:#fff;background:linear-gradient(135deg,rgba(192,132,252,.22),rgba(168,85,247,.18));border:1px solid rgba(192,132,252,.25)}
-.modal-body{padding:16px 20px 20px;overflow:auto;max-height:calc(90vh - 90px)}
-.history-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}
-.history-kpi{border-radius:16px;padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
-.history-kpi-label{color:var(--muted);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
-.history-kpi-value{margin-top:10px;font-size:24px;font-weight:900}
-.back-to-top{position:fixed;right:18px;bottom:18px;width:48px;height:48px;border:none;border-radius:999px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(192,132,252,.95),rgba(168,85,247,.95));color:#fff;font-size:22px;font-weight:900;cursor:pointer;box-shadow:0 14px 30px rgba(0,0,0,.28);z-index:999;opacity:0;visibility:hidden;transform:translateY(10px);transition:.25s}
-.back-to-top.show{opacity:1;visibility:visible;transform:translateY(0)}
-@media(max-width:1450px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.filter-grid{grid-template-columns:1fr 1fr 1fr}.status-strip{grid-template-columns:1fr 1fr}.summary-grid,.two-grid,.three-grid{grid-template-columns:1fr}}
-@media(max-width:900px){.hero-grid{grid-template-columns:1fr}.history-kpis{grid-template-columns:1fr 1fr}.hero-side{grid-template-columns:1fr 1fr}}
-@media(max-width:700px){.kpi-grid,.hero-side,.status-strip,.filter-grid,.history-kpis{grid-template-columns:1fr}.hero h1{font-size:30px}.simple-list li{grid-template-columns:1fr}.compact-score{text-align:left}}
-
-#searchBtn,#clearSearchBtn{flex:0 0 auto}
-@media(max-width:700px){
-  #searchInput{min-width:0}
-  #searchBtn,#clearSearchBtn{width:auto!important;min-width:80px}
-}
-
-
-.mini-note{
-  margin-top:8px;
-  color:var(--muted);
-  font-size:11px;
-  line-height:1.45;
-  font-weight:700;
-}
-
+:root{--bg:#100814;--panel:rgba(36,18,48,.74);--stroke:rgba(255,255,255,.11);--text:#fff7ff;--muted:#cdb8db;--green:#35d28a;--red:#ff6b7d;--amber:#facc15;--purple:#a855f7;--blue:#c084fc;--shadow:0 18px 45px rgba(0,0,0,.32);--radius:22px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(192,132,252,.14),transparent 24%),radial-gradient(circle at top right,rgba(53,210,138,.10),transparent 24%),linear-gradient(135deg,#120817,#1b0f25 42%,#2b1535 100%);min-height:100vh}.container{width:min(1650px,calc(100% - 20px));margin:auto;padding:12px 0 42px}.glass{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));border:1px solid var(--stroke);box-shadow:var(--shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.topbar,.hero,.filters,.panel,.table-card,.list-card,.summary-card{border-radius:var(--radius);margin-bottom:12px}.topbar{padding:12px}.topbar-inner,.panel-head,.filters-head,.summary-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.brand{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke);background:rgba(255,255,255,.07);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));box-shadow:0 0 16px rgba(168,85,247,.8)}.status-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;flex:1 1 760px}.pill{padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--stroke);font-size:12px;color:#f4e8ff;line-height:1.45}.home-btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:white;font-weight:900;min-height:42px;padding:0 16px;border-radius:14px;background:linear-gradient(135deg,rgba(192,132,252,.24),rgba(168,85,247,.18));border:1px solid rgba(192,132,252,.28)}.hero{padding:22px;overflow:hidden}.hero-grid{display:grid;grid-template-columns:1.65fr .85fr;gap:16px}.hero h1{margin:10px 0 8px;font-size:clamp(30px,4vw,52px);line-height:1.02;letter-spacing:-.05em}.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.7;max-width:940px}.hero-side{display:grid;grid-template-columns:1fr 1fr;gap:12px}.mini,.kpi{border-radius:18px;background:rgba(255,255,255,.05);border:1px solid var(--stroke);padding:14px}.mini-label,.kpi-label{font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.06em}.mini-value{font-size:18px;font-weight:900;margin-top:10px}.mini-note{margin-top:8px;color:var(--muted);font-size:11px;line-height:1.45;font-weight:700}.filters,.summary-card{padding:16px 18px}.section-title,.panel-title{margin:0;font-size:18px;font-weight:900}.section-subtitle,.panel-desc{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.5}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tab{border:1px solid var(--stroke);background:rgba(255,255,255,.05);color:#fff;border-radius:999px;padding:10px 14px;font-weight:900;cursor:pointer}.tab.active{background:linear-gradient(135deg,rgba(192,132,252,.38),rgba(168,85,247,.28));border-color:rgba(192,132,252,.48)}.filter-grid{display:grid;grid-template-columns:140px 200px 160px 170px minmax(240px,1fr) 140px;gap:12px;align-items:end;margin-top:12px}.field label{display:block;font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}.input,.select,.button{width:100%;min-height:46px;border-radius:14px;border:1px solid var(--stroke);background:rgba(255,255,255,.05);color:#fff;padding:0 14px;font-family:inherit;outline:none}.select option{background:#2b1535;color:#fff}.button{cursor:pointer;font-weight:900;background:linear-gradient(135deg,rgba(192,132,252,.22),rgba(168,85,247,.18));transition:.2s}.button:hover{transform:translateY(-1px)}.button:disabled{opacity:.45;cursor:not-allowed;transform:none}.summary-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:12px}.summary-box{border:1px solid var(--stroke);background:rgba(255,255,255,.04);border-radius:18px;padding:14px}.summary-title{font-size:13px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}.summary-main{font-size:24px;font-weight:900;letter-spacing:-.03em}.summary-text{color:#f0e6ff;font-size:13px;line-height:1.65;margin-top:8px}.kpi-grid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:12px;margin-bottom:12px}.kpi{min-height:118px;overflow:hidden}.kpi.blue{background:linear-gradient(180deg,rgba(88,28,135,.70),rgba(59,7,100,.78))}.kpi.green{background:linear-gradient(180deg,rgba(26,77,65,.66),rgba(14,38,36,.78))}.kpi.red{background:linear-gradient(180deg,rgba(95,34,48,.68),rgba(43,17,24,.80))}.kpi.gold{background:linear-gradient(180deg,rgba(92,67,28,.66),rgba(40,30,15,.80))}.kpi.purple{background:linear-gradient(180deg,rgba(79,50,140,.70),rgba(36,22,70,.82))}.kpi-value{font-size:clamp(19px,2vw,34px);line-height:1;font-weight:900;letter-spacing:-.05em;margin:13px 0 8px}.kpi-note{color:var(--muted);font-size:11px;line-height:1.45;font-weight:700}.panel{overflow:hidden}.panel-head{padding:16px 18px 0}.chip{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--stroke);background:rgba(255,255,255,.06);font-size:11px;font-weight:900;color:#f0e6ff}.panel-body{padding:14px 18px 18px}.chart-wrap{height:330px;border-radius:18px;border:1px solid var(--stroke);background:rgba(255,255,255,.03);padding:10px}.chart-wrap.small{height:310px}.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.three-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.table-wrap{overflow:auto;border-top:1px solid var(--stroke);max-height:680px}table{width:100%;border-collapse:collapse;min-width:1500px}thead th{position:sticky;top:0;z-index:2;background:#251332;color:#f3e8ff;font-size:11px;text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.14);white-space:nowrap}tbody td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;white-space:nowrap;vertical-align:middle}tbody tr:hover{background:rgba(255,255,255,.04)}tr.repeat-row{background:linear-gradient(90deg,rgba(255,107,125,.18),rgba(255,107,125,.03))}.name-wrap{display:flex;align-items:center;gap:10px}.avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900;background:linear-gradient(135deg,var(--blue),var(--purple));flex:0 0 36px}.player-link{cursor:pointer;font-weight:800}.player-link:hover{color:#e9d5ff}.badge{display:inline-flex;align-items:center;justify-content:center;min-height:24px;padding:0 10px;border-radius:999px;font-size:10px;font-weight:900;letter-spacing:.04em;border:1px solid transparent}.met{color:#9ff0c7;background:rgba(53,210,138,.14);border-color:rgba(53,210,138,.24)}.fail{color:#ffb6c0;background:rgba(255,107,125,.12);border-color:rgba(255,107,125,.24)}.zero{color:#d8c4ff;background:rgba(139,92,246,.14);border-color:rgba(139,92,246,.24)}.new{color:#ffe68a;background:rgba(250,204,21,.14);border-color:rgba(250,204,21,.24)}.exist{color:#9ff0c7;background:rgba(53,210,138,.14);border-color:rgba(53,210,138,.24)}.left{color:#ffb6c0;background:rgba(255,107,125,.12);border-color:rgba(255,107,125,.24)}.returned{color:#e9d5ff;background:rgba(192,132,252,.14);border-color:rgba(192,132,252,.24)}.action{color:#ffdde3;background:rgba(255,107,125,.18);border-color:rgba(255,107,125,.35);box-shadow:0 0 18px rgba(255,107,125,.12)}.watch{color:#ffe68a;background:rgba(250,204,21,.14);border-color:rgba(250,204,21,.24)}.metric-pos{color:#61e29d;font-weight:900}.metric-neg{color:#ff7f8f;font-weight:900}.metric-flat,.metric-none{color:#ffd978;font-weight:900}.list-body{padding:14px 16px 16px}.simple-list{list-style:none;margin:0;padding:0}.simple-list li{display:grid;grid-template-columns:minmax(0,1fr) 110px 150px;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}.compact-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.compact-score{text-align:right;font-weight:900}.section-anchor{scroll-margin-top:14px}.hidden{display:none!important}@media(max-width:1450px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.filter-grid{grid-template-columns:1fr 1fr 1fr}.status-strip{grid-template-columns:1fr 1fr}.summary-grid,.two-grid,.three-grid{grid-template-columns:1fr}}@media(max-width:900px){.hero-grid{grid-template-columns:1fr}.hero-side{grid-template-columns:1fr 1fr}}@media(max-width:700px){.kpi-grid,.hero-side,.status-strip,.filter-grid{grid-template-columns:1fr}.hero h1{font-size:30px}.simple-list li{grid-template-columns:1fr}.compact-score{text-align:left}}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="topbar glass">
-    <div class="topbar-inner">
-      <div class="brand"><span class="dot"></span> WAP Intelligence Hub</div>
-      <div class="status-strip">
-        <div class="pill"><strong>Latest Tinman:</strong> <span id="latestEvent">Loading...</span></div>
-        <div class="pill"><strong>G9 Minimum:</strong> 80M points</div>
-        <div class="pill"><strong>Others Minimum:</strong> 36M points</div>
-        <div class="pill"><strong>Action Rule:</strong> 3 Consecutive Target Failures</div>
-      </div>
-      <a class="home-btn" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">⌂ Top</a>
-    </div>
-  </div>
+  <div class="topbar glass"><div class="topbar-inner"><div class="brand"><span class="dot"></span> WAP Intelligence Hub</div><div class="status-strip"><div class="pill"><strong>Latest Event:</strong> <span id="latestEvent">Loading...</span></div><div class="pill"><strong>Tinman:</strong> Targets from Settings</div><div class="pill"><strong>Vault:</strong> Level of vault built</div><div class="pill"><strong>Action Rule:</strong> 3 consecutive failures / below threshold</div></div><a class="home-btn" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">⌂ Top</a></div></div>
+  <section class="hero glass"><div class="hero-grid"><div><div class="brand">WAP Member Contribution Dashboard</div><h1>Player Performance & Lifecycle Tracking</h1><p>Historical Tinman performance analysis remains intact, with Vault tracking added beside it. Track player contributions against G-level targets, identify repeat offenders, monitor compliance trends, preserve lifecycle history, and measure whether members built their expected vault level during each event cycle.</p></div><div class="hero-side"><div class="mini"><div class="mini-label">Executive View</div><div class="mini-value" id="execHealth">Loading...</div><div class="mini-note" id="execHealthNote">Awaiting event analysis...</div></div><div class="mini"><div class="mini-label">Data Source</div><div class="mini-value">Google Sheet CSV + GitHub HTML</div><div class="mini-note">players, settings, tinman_raw, vaults</div></div><div class="mini"><div class="mini-label">Latest Tinman Total</div><div class="mini-value" id="heroTotal">Loading...</div></div><div class="mini"><div class="mini-label">Vault Participation</div><div class="mini-value" id="heroVault">Loading...</div></div></div></div></section>
+  <section class="summary-card glass"><div class="summary-head"><div><h2 class="section-title">Leadership Summary</h2><p class="section-subtitle">A consolidated overview of Tinman performance, Vault participation, compliance rates, lifecycle movement, and leadership action flags.</p></div><span class="chip" id="summaryBadge">Loading</span></div><div class="summary-grid"><div class="summary-box"><div class="summary-title">Overall Health</div><div class="summary-main" id="summaryHealth">Loading...</div><div class="summary-text" id="summaryNarrative">Loading dashboard insights...</div></div><div class="summary-box"><div class="summary-title">Leadership Action</div><div class="summary-main" id="summaryAction">Loading...</div><div class="summary-text" id="summaryActionText">Repeat offenders and vault non-builders will appear here.</div></div></div></section>
+  <section class="filters glass"><div class="filters-head"><div><h2 class="section-title">Navigation & Filters</h2><p class="section-subtitle">Switch between Tinman, Vault, and Combined views without losing the original Tinman intelligence sections.</p></div></div><div class="tabs"><button class="tab active" data-mode="combined">Combined View</button><button class="tab" data-mode="tinman">Tinman Only</button><button class="tab" data-mode="vault">Vaults Only</button></div><div class="filter-grid"><div class="field"><label>Event</label><button class="button" id="prevBtn">← Previous</button></div><div class="field"><label for="eventSelect">Event Date</label><select class="select" id="eventSelect"></select></div><div class="field"><label for="windowSelect">Window</label><select class="select" id="windowSelect"><option value="3">Last 3 events</option><option value="5">Last 5 events</option><option value="10" selected>Last 10 events</option><option value="all">All-time</option></select></div><div class="field"><label for="gFilter">G Level</label><select class="select" id="gFilter"><option value="">All G Levels</option></select></div><div class="field"><label for="searchInput">Search Player</label><input class="input" id="searchInput" placeholder="Search player..."></div><div class="field"><label>Event</label><button class="button" id="nextBtn">Next →</button></div></div><div class="filter-grid" style="grid-template-columns:1fr 1fr 1fr;margin-top:12px"><div class="field"><label for="statusFilter">Tinman Status</label><select class="select" id="statusFilter"><option value="">All Status</option><option>Met Target</option><option>Below Target</option><option>No Participation</option></select></div><div class="field"><label for="concernFilter">Concern Filter</label><select class="select" id="concernFilter"><option value="">All Players</option><option value="repeat3">3x Failure</option><option value="lowpct">Below Participation Threshold</option><option value="both">Both Conditions</option><option value="movement">New / Left / Returned</option></select></div><div class="field"><label>Reset Filters</label><button class="button" id="resetFilters">Clear Filters</button></div></div></section>
 
-  <section class="hero glass">
-    <div class="hero-grid">
-      <div>
-        <div class="brand">WAP Tinman Dashboard</div>
-        <h1>Player Performance & Lifecycle Tracking</h1>
-        <p>Historical Tinman performance analysis for WAP. Track player contributions against G-level targets, identify repeat offenders, monitor compliance trends, and preserve complete player history. Members are automatically classified as <strong>New, Existing, Left, or Returned</strong>, providing leadership with a comprehensive view of participation, accountability, and long-term performance.</p>
-      </div>
-      <div class="hero-side">
-        <div class="mini"><div class="mini-label">Executive View</div><div class="mini-value" id="execHealth">Loading...</div><div class="mini-note" id="execHealthNote">Awaiting event analysis...</div></div>
-        <div class="mini"><div class="mini-label">Data Source</div><div class="mini-value">WAP Tinman Historical Database</div><div class="mini-note">Performance, compliance, and lifecycle analytics</div></div>
-        <div class="mini"><div class="mini-label">Latest Total</div><div class="mini-value" id="heroTotal">Loading...</div></div>
-        <div class="mini"><div class="mini-label">Compliance</div><div class="mini-value" id="heroCompliance">Loading...</div></div>
-      </div>
-    </div>
-  </section>
+  <section class="kpi-grid" id="tinmanKpis"><div class="kpi blue"><div class="kpi-label">Total Registered</div><div class="kpi-value" id="kpiRegistered">0</div><div class="kpi-note">Unique players recorded across all events</div></div><div class="kpi green"><div class="kpi-label">Active This Event</div><div class="kpi-value" id="kpiActive">0</div><div class="kpi-note">Players participating in selected Tinman event</div></div><div class="kpi red"><div class="kpi-label">Left Players</div><div class="kpi-value" id="kpiLeft">0</div><div class="kpi-note">Previously active but absent this event</div></div><div class="kpi gold"><div class="kpi-label">Returned Players</div><div class="kpi-value" id="kpiReturned">0</div><div class="kpi-note">Returned after one or more missed events</div></div><div class="kpi purple"><div class="kpi-label">Clan Total</div><div class="kpi-value" id="kpiTotal">0</div><div class="kpi-note">Total points for selected event</div></div><div class="kpi blue"><div class="kpi-label">Average Score</div><div class="kpi-value" id="kpiAvg">0</div><div class="kpi-note">Average points per participating player</div></div><div class="kpi green"><div class="kpi-label">Met Target</div><div class="kpi-value" id="kpiMet">0</div><div class="kpi-note">Players meeting G-level requirement</div></div><div class="kpi red"><div class="kpi-label">Below Target</div><div class="kpi-value" id="kpiBelow">0</div><div class="kpi-note">Players below G-level requirement</div></div><div class="kpi red"><div class="kpi-label">Repeat Offenders</div><div class="kpi-value" id="kpiRepeat3">0</div><div class="kpi-note">Missed target in 3 consecutive events</div></div></section>
+  <section class="kpi-grid" id="vaultKpis"><div class="kpi gold"><div class="kpi-label">Vault Builders</div><div class="kpi-value" id="kpiVaultBuilt">0</div><div class="kpi-note">Built vault this selected event</div></div><div class="kpi red"><div class="kpi-label">Vault Non-Builders</div><div class="kpi-value" id="kpiVaultMiss">0</div><div class="kpi-note">Did not build vault this event</div></div><div class="kpi green"><div class="kpi-label">Vault Participation %</div><div class="kpi-value" id="kpiVaultPct">0%</div><div class="kpi-note">Builders against roster</div></div><div class="kpi blue"><div class="kpi-label">Avg Vault Level</div><div class="kpi-value" id="kpiAvgVault">0</div><div class="kpi-note">Average level built</div></div><div class="kpi red"><div class="kpi-label">Vault 3x Failures</div><div class="kpi-value" id="kpiVaultRepeat">0</div><div class="kpi-note">3 consecutive non-builds</div></div><div class="kpi purple"><div class="kpi-label">Below 60%</div><div class="kpi-value" id="kpiLowPct">0</div><div class="kpi-note">Below participation threshold</div></div><div class="kpi red"><div class="kpi-label">Both Conditions</div><div class="kpi-value" id="kpiBoth">0</div><div class="kpi-note">3 fails and below threshold</div></div><div class="kpi green"><div class="kpi-label">Most Common Time</div><div class="kpi-value" id="kpiTopTime">—</div><div class="kpi-note">Reset build timing</div></div><div class="kpi blue"><div class="kpi-label">Highest Vault</div><div class="kpi-value" id="kpiHighVault">—</div><div class="kpi-note">Highest level built</div></div></section>
 
-  <section class="summary-card glass">
-    <div class="summary-head">
-      <div>
-        <h2 class="section-title">Leadership Summary</h2>
-        <p class="section-subtitle">A consolidated overview of clan performance, compliance rates, participation levels, and contribution trends for the selected event.</p>
-      </div>
-      <span class="chip" id="summaryBadge">Loading</span>
-    </div>
-    <div class="summary-grid">
-      <div class="summary-box">
-        <div class="summary-title">Overall Health</div>
-        <div class="summary-main" id="summaryHealth">Loading...</div>
-        <div class="summary-text" id="summaryNarrative">Loading dashboard insights...</div>
-      </div>
-      <div class="summary-box">
-        <div class="summary-title">Leadership Action</div>
-        <div class="summary-main" id="summaryAction">Loading...</div>
-        <div class="summary-text" id="summaryActionText">Repeat offenders and movement risk will appear here.</div>
-      </div>
-    </div>
-  </section>
+  <section class="three-grid tinman-section"><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Target Achievement Analysis</h3><p class="panel-desc">Measure how effectively the clan is meeting established G-level contribution standards for the selected event.</p></div><div class="chip">Executive</div></div><div class="panel-body"><div class="chart-wrap small"><canvas id="donutChart"></canvas></div></div></div><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Player Lifecycle Management</h3><p class="panel-desc">Track recruitment, departures, and returns while preserving complete historical records.</p></div><div class="chip">Lifecycle</div></div><div class="panel-body"><div class="chart-wrap small"><canvas id="lifeChart"></canvas></div></div></div><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Consecutive Underperformance Tracking</h3><p class="panel-desc">Highlight recurring participation issues and focus leadership improvement efforts where they are most needed.</p></div><div class="chip">Governance</div></div><div class="panel-body"><div class="chart-wrap small"><canvas id="riskChart"></canvas></div></div></div></section>
+  <section class="three-grid vault-section"><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Vault Build Participation</h3><p class="panel-desc">Shows who built a vault versus who did not build during the selected event.</p></div><div class="chip">Vaults</div></div><div class="panel-body"><div class="chart-wrap small"><canvas id="vaultDonut"></canvas></div></div></div><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Vault Level Distribution</h3><p class="panel-desc">Distribution of actual/expected vault levels built by G-level.</p></div><div class="chip">Vault Level Built</div></div><div class="panel-body"><div class="chart-wrap small"><canvas id="vaultLevelChart"></canvas></div></div></div><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Vault Failure Tracking</h3><p class="panel-desc">Flags players who consistently do not build vaults.</p></div><div class="chip">Governance</div></div><div class="panel-body"><div class="chart-wrap small"><canvas id="vaultRiskChart"></canvas></div></div></div></section>
 
-  <section class="filters glass">
-    <div class="filters-head">
-      <div>
-        <h2 class="section-title">Navigation & Filters</h2>
-        <p class="section-subtitle">Search any player to view their complete Tinman history, event rankings, contribution trends, lifecycle status, and cumulative performance across all recorded events.</p>
-      </div>
-    </div>
-    <div class="filter-grid">
-      <div class="field"><label>Event</label><button class="button" id="prevBtn">← Previous</button></div>
-      <div class="field"><label for="eventSelect">Event Date</label><select class="select" id="eventSelect"></select></div>
-      <div class="field"><label for="searchInput">Search Player</label><div style="display:flex;gap:8px">
-          <input class="input" id="searchInput" placeholder="Search player...">
-          <button class="button" id="searchBtn" style="width:110px">Search</button>
-          <button class="button" id="clearSearchBtn" style="width:90px">Clear</button>
-        </div></div>
-      <div class="field"><label for="gFilter">G Level</label><select class="select" id="gFilter"><option value="">All G Levels</option></select></div>
-      <div class="field"><label for="statusFilter">Target Status</label><select class="select" id="statusFilter"><option value="">All Status</option><option>Met Target</option><option>Below Target</option><option>No Participation</option></select></div>
-      <div class="field"><label for="lifeFilter">Lifecycle</label><select class="select" id="lifeFilter"><option value="">All Lifecycle</option><option>New</option><option>Existing</option><option>Returned</option><option>Left</option></select></div>
-      <div class="field"><label>Event</label><button class="button" id="nextBtn">Next →</button></div>
-    </div>
-    <div class="filter-grid" style="grid-template-columns:1fr 1fr 1fr;margin-top:12px">
-      <div class="field"><label for="actionFilter">Action Filter</label><select class="select" id="actionFilter"><option value="">All Players</option><option value="repeat3">3x Repeat Offenders</option><option value="watch2">2x Watchlist</option><option value="movement">New / Left / Returned</option></select></div>
-      <div class="field"><label>Reset Filters</label><button class="button" id="resetFilters">Clear Filters</button></div>
-      <div class="field"><label>Player Analysis</label><button class="button" id="memberViewBtn">View Player Analysis ↓</button></div>
-    </div>
-  </section>
+  <section class="two-grid tinman-section"><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Historical Clan Points Trend</h3><p class="panel-desc">Total Tinman points by date.</p></div><div class="chip">Trend</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="trendChart"></canvas></div></div></div><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">G-Level Compliance Monitoring</h3><p class="panel-desc">Compare performance compliance by G-level to identify accountability gaps and strong-performing tiers.</p></div><div class="chip">G-Level</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="gChart"></canvas></div></div></div></section>
+  <section class="two-grid vault-section"><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Vault Participation Trend</h3><p class="panel-desc">Participation percentage across event cycles.</p></div><div class="chip">Trend</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="vaultTrend"></canvas></div></div></div><div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Vault Build Timing</h3><p class="panel-desc">Distribution by Reset +1, Reset +2, Reset +3, and other captured build times.</p></div><div class="chip">Timing</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="vaultTime"></canvas></div></div></div></section>
 
-  <section class="kpi-grid">
-    <div class="kpi blue"><div class="kpi-label">Total Registered</div><div class="kpi-value" id="kpiRegistered">0</div><div class="kpi-note">Unique players recorded across all events</div></div>
-    <div class="kpi green"><div class="kpi-label">Active This Event</div><div class="kpi-value" id="kpiActive">0</div><div class="kpi-note">Players participating in selected event</div></div>
-    <div class="kpi red"><div class="kpi-label">Left Players</div><div class="kpi-value" id="kpiLeft">0</div><div class="kpi-note">Previously active but absent this event</div></div>
-    <div class="kpi gold"><div class="kpi-label">Returned Players</div><div class="kpi-value" id="kpiReturned">0</div><div class="kpi-note">Returned after one or more missed events</div></div>
-    <div class="kpi purple"><div class="kpi-label">Clan Total</div><div class="kpi-value" id="kpiTotal">0</div><div class="kpi-note">Total points for selected event</div></div>
-    <div class="kpi blue"><div class="kpi-label">Average Score</div><div class="kpi-value" id="kpiAvg">0</div><div class="kpi-note">Average points per participating player</div></div>
-    <div class="kpi green"><div class="kpi-label">Met Target</div><div class="kpi-value" id="kpiMet">0</div><div class="kpi-note">Players meeting G-level requirement</div></div>
-    <div class="kpi red"><div class="kpi-label">Below Target</div><div class="kpi-value" id="kpiBelow">0</div><div class="kpi-note">Players below G-level requirement</div></div>
-    <div class="kpi red"><div class="kpi-label">Repeat Offenders </div><div class="kpi-value" id="kpiRepeat3">0</div><div class="kpi-note">Missed target in 3 consecutive events</div></div>
-  </section>
+  <section class="panel glass tinman-section"><div class="panel-head"><div><h3 class="panel-title">Current Event Top Contributors</h3><p class="panel-desc">Members who delivered the strongest contributions during the selected Tinman event.</p></div><div class="chip">Top Performers</div></div><div class="panel-body"><div class="chart-wrap small"><canvas id="topChart"></canvas></div></div></section>
+  <section class="panel glass vault-section"><div class="panel-head"><div><h3 class="panel-title">Current Event Vault Builders</h3><p class="panel-desc">Players who built vaults, ordered by vault level and rank.</p></div><div class="chip">Vault Builders</div></div><div class="panel-body"><div class="chart-wrap small"><canvas id="vaultBuilderChart"></canvas></div></div></section>
 
-  <section class="three-grid">
-    <div class="panel glass">
-      <div class="panel-head"><div><h3 class="panel-title">Target Achievement Analysis</h3><p class="panel-desc">Measure how effectively the clan is meeting established G-level contribution standards for the selected event.</p></div><div class="chip">Executive</div></div>
-      <div class="panel-body"><div class="chart-wrap small"><canvas id="donutChart"></canvas></div></div>
-    </div>
-    <div class="panel glass">
-      <div class="panel-head"><div><h3 class="panel-title">Player Lifecycle Management</h3><p class="panel-desc">Track recruitment, departures, and returns while preserving complete historical records.</p></div><div class="chip">Lifecycle</div></div>
-      <div class="panel-body"><div class="chart-wrap small"><canvas id="lifeChart"></canvas></div></div>
-    </div>
-    <div class="panel glass">
-      <div class="panel-head"><div><h3 class="panel-title">Consecutive Underperformance Tracking</h3><p class="panel-desc">Highlight recurring participation issues and focus leadership improvement efforts where they are most needed.</p></div><div class="chip">Governance</div></div>
-      <div class="panel-body"><div class="chart-wrap small"><canvas id="riskChart"></canvas></div></div>
-    </div>
-  </section>
+  <section id="playerAnalysisSection" class="table-card glass tinman-section"><div class="panel-head"><div><h3 class="panel-title">Historical Performance & Accountability Tracking</h3><p class="panel-desc">Track individual Tinman performance across all recorded events. Historical records are permanently retained, enabling leadership to review contribution trends, participation consistency, and long-term accountability.</p></div><div class="chip">Click Player</div></div><div class="table-wrap"><table><thead><tr><th>Player</th><th>G Level</th><th>Lifecycle</th><th>Rank</th><th>Score</th><th>Target</th><th>Gap</th><th>Target Status</th><th>Failure Streak</th><th>Action</th><th>Previous Score</th><th>Change</th><th>Events Played</th><th>Total Points</th></tr></thead><tbody id="playerTable"></tbody></table></div></section>
+  <section class="table-card glass vault-section"><div class="panel-head"><div><h3 class="panel-title">Vault History & Accountability Tracking</h3><p class="panel-desc">Track whether each member built a vault, the vault level built, build time, participation percentage, and non-build streak.</p></div><div class="chip">Vaults</div></div><div class="table-wrap"><table><thead><tr><th>Player</th><th>G Level</th><th>Expected Vault Level</th><th>Vault Level Built</th><th>Built Vault</th><th>Build Time</th><th>Build Streak Fail</th><th>Participation %</th><th>Concern</th></tr></thead><tbody id="vaultTable"></tbody></table></div></section>
+  <section class="table-card glass combined-section"><div class="panel-head"><div><h3 class="panel-title">Combined Member Analysis</h3><p class="panel-desc">One leadership view combining Tinman target performance and Vault build participation.</p></div><div class="chip">Combined</div></div><div class="table-wrap"><table><thead><tr><th>Player</th><th>G Level</th><th>Tinman Score</th><th>Tinman Result</th><th>Tinman Streak</th><th>Tinman %</th><th>Vault Built</th><th>Vault Level Built</th><th>Build Time</th><th>Vault Streak</th><th>Vault %</th><th>Leadership Concern</th></tr></thead><tbody id="combinedTable"></tbody></table></div></section>
 
-  <section class="two-grid">
-    <div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">Historical Clan Points Trend</h3><p class="panel-desc">Total Tinman points by date.</p></div><div class="chip">Trend</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="trendChart"></canvas></div></div></div>
-    <div class="panel glass"><div class="panel-head"><div><h3 class="panel-title">G-Level Compliance Monitoring</h3><p class="panel-desc">Compare performance compliance by G-level to identify accountability gaps and strong-performing tiers.</p></div><div class="chip">G-Level</div></div><div class="panel-body"><div class="chart-wrap"><canvas id="gChart"></canvas></div></div></div>
-  </section>
-
-  <section class="panel glass">
-    <div class="panel-head"><div><h3 class="panel-title">Current Event Top Contributors</h3><p class="panel-desc">Members who delivered the strongest contributions during the selected Tinman event.</p></div><div class="chip">Top Performers</div></div>
-    <div class="panel-body"><div class="chart-wrap small"><canvas id="topChart"></canvas></div></div>
-  </section>
-
-  <section id="playerAnalysisSection" class="table-card glass">
-    <div class="panel-head"><div><h3 class="panel-title">Historical Performance & Accountability Tracking</h3><p class="panel-desc">Track individual Tinman performance across all recorded events. Historical records are permanently retained, enabling leadership to review contribution trends, participation consistency, and long-term accountability. Members who leave remain visible in historical data, while returning members automatically reconnect to their previous performance history.</p></div><div class="chip">Click Player</div></div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Player</th><th>G Level</th><th>Lifecycle</th><th>Rank</th><th>Score</th><th>Target</th><th>Gap</th><th>Target Status</th><th>Failure Streak</th><th>Action</th><th>Previous Score</th><th>Change</th><th>Events Played</th><th>Total Points</th></tr></thead>
-        <tbody id="playerTable"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="three-grid">
-    <div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Repeat Offender Review Required</h3><p class="panel-desc">Players listed here have failed to achieve their required Tinman contribution target for three consecutive events.</p></div><span class="badge action">Action Required</span></div><div class="list-body"><ul class="simple-list" id="repeatList"></ul></div></div>
-    <div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">2-Event Watchlist</h3><p class="panel-desc">Players approaching repeat-offender status and requiring early follow-up before formal action is needed.</p></div><span class="badge watch">Monitor</span></div><div class="list-body"><ul class="simple-list" id="watchList"></ul></div></div>
-    <div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Left / Returned / New</h3><p class="panel-desc">Track recruitment, departures, and returns while preserving complete historical records. No performance data is removed, ensuring accurate long-term analysis and continuity of player history across all Tinman events.</p></div><span class="badge new">Movement</span></div><div class="list-body"><ul class="simple-list" id="movementList"></ul></div></div>
-  </section>
-
-  <section class="two-grid">
-    <div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Below Target Players</h3><p class="panel-desc">Active members whose Tinman contribution did not meet the minimum target required for their G-level during the selected event.</p></div><span class="badge fail">Attention</span></div><div class="list-body"><ul class="simple-list" id="belowList"></ul></div></div>
-    <div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Top Performers</h3><p class="panel-desc">Current event contributors with the strongest performance results for the selected Tinman cycle.</p></div><span class="badge met">Strong</span></div><div class="list-body"><ul class="simple-list" id="topList"></ul></div></div>
-  </section>
+  <section class="three-grid tinman-section"><div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Repeat Offender Review Required</h3><p class="panel-desc">Players listed here have failed to achieve their required Tinman contribution target for three consecutive events.</p></div><span class="badge action">Action Required</span></div><div class="list-body"><ul class="simple-list" id="repeatList"></ul></div></div><div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">2-Event Watchlist</h3><p class="panel-desc">Players approaching repeat-offender status and requiring early follow-up before formal action is needed.</p></div><span class="badge watch">Monitor</span></div><div class="list-body"><ul class="simple-list" id="watchList"></ul></div></div><div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Left / Returned / New</h3><p class="panel-desc">Track recruitment, departures, and returns while preserving complete historical records.</p></div><span class="badge new">Movement</span></div><div class="list-body"><ul class="simple-list" id="movementList"></ul></div></div></section>
+  <section class="three-grid vault-section"><div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Vault Repeat Non-Builders</h3><p class="panel-desc">Players who did not build vaults for three consecutive tracked events.</p></div><span class="badge action">Action Required</span></div><div class="list-body"><ul class="simple-list" id="vaultRepeatList"></ul></div></div><div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Vault 2-Event Watchlist</h3><p class="panel-desc">Players approaching repeat non-builder status.</p></div><span class="badge watch">Monitor</span></div><div class="list-body"><ul class="simple-list" id="vaultWatchList"></ul></div></div><div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Consistent Vault Builders</h3><p class="panel-desc">Players with strong vault participation inside the selected window.</p></div><span class="badge met">Strong</span></div><div class="list-body"><ul class="simple-list" id="vaultStrongList"></ul></div></div></section>
+  <section class="two-grid tinman-section"><div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Below Target Players</h3><p class="panel-desc">Active members whose Tinman contribution did not meet the minimum target required for their G-level.</p></div><span class="badge fail">Attention</span></div><div class="list-body"><ul class="simple-list" id="belowList"></ul></div></div><div class="list-card glass"><div class="panel-head"><div><h3 class="panel-title">Top Performers</h3><p class="panel-desc">Current event contributors with the strongest performance results.</p></div><span class="badge met">Strong</span></div><div class="list-body"><ul class="simple-list" id="topList"></ul></div></div></section>
 </div>
-
-<div id="modal" class="modal" aria-hidden="true">
-  <div class="modal-card">
-    <div class="modal-head">
-      <div><h3 id="modalTitle" class="modal-title">Player History</h3><p id="modalSub" class="modal-sub">Historical performance by Tinman date</p></div>
-      <button id="modalClose" class="modal-close">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="history-kpis">
-        <div class="history-kpi"><div class="history-kpi-label">Events Played</div><div id="hEvents" class="history-kpi-value">0</div></div>
-        <div class="history-kpi"><div class="history-kpi-label">Total Points</div><div id="hTotal" class="history-kpi-value">0</div></div>
-        <div class="history-kpi"><div class="history-kpi-label">Best Rank</div><div id="hBestRank" class="history-kpi-value">—</div></div>
-        <div class="history-kpi"><div class="history-kpi-label">Best Score</div><div id="hBestScore" class="history-kpi-value">0</div></div>
-        <div class="history-kpi"><div class="history-kpi-label">Failure Streak</div><div id="hStreak" class="history-kpi-value">0</div></div>
-      </div>
-      <div class="chart-wrap small"><canvas id="historyChart"></canvas></div>
-      <div class="table-wrap" style="max-height:360px;border:1px solid rgba(255,255,255,.08);border-radius:18px;margin-top:14px">
-        <table><thead><tr><th>Date</th><th>Rank</th><th>G Level</th><th>Score</th><th>Target</th><th>Gap</th><th>Status</th><th>Failure Streak</th></tr></thead><tbody id="historyTable"></tbody></table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<button id="backToTopBtn" class="back-to-top">↑</button>
-
 <script>
-const DATA_URL='tinman_raw.csv';
-let rows=[], events=[], selectedEvent=null, allPlayers=[], trendChart=null, topChart=null, gChart=null, historyChart=null, donutChart=null, lifeChart=null, riskChart=null;
-let activeOnlyMode=false;
-
+const CONFIG={
+  playersUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3vYrbGW1nIS1gVsBuDKFqgUeWaCw1acB5IcH8t6u3Ig1r-oagVthtJw-iakG5_A/pub?gid=748878844&single=true&output=csv',
+  settingsUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3vYrbGW1nIS1gVsBuDKFqgUeWaCw1acB5IcH8t6u3Ig1r-oagVthtJw-iakG5_A/pub?gid=1796477589&single=true&output=csv',
+  tinmanUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3vYrbGW1nIS1gVsBuDKFqgUeWaCw1acB5IcH8t6u3Ig1r-oagVthtJw-iakG5_A/pub?gid=317066708&single=true&output=csv',
+  vaultsUrl:'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3vYrbGW1nIS1gVsBuDKFqgUeWaCw1acB5IcH8t6u3Ig1r-oagVthtJw-iakG5_A/pub?gid=1950276509&single=true&output=csv'
+};
+let players=[],settings={targets:{},vaultLevels:{},threshold:.6},tinman=[],vaults=[],events=[],selectedEvent='',mode='combined',charts={};
 function parseCSVLine(line){const out=[];let cur='',q=false;for(let i=0;i<line.length;i++){const c=line[i],n=line[i+1];if(c==='"'&&q&&n==='"'){cur+='"';i++}else if(c==='"'){q=!q}else if(c===','&&!q){out.push(cur);cur=''}else cur+=c}out.push(cur);return out}
-function parseCSV(text){const lines=text.trim().split(/\r?\n/).filter(Boolean);if(!lines.length)return[];const heads=parseCSVLine(lines[0]).map(x=>x.replace(/^\uFEFF/,'').trim());return lines.slice(1).map(line=>{const vals=parseCSVLine(line);const r={};heads.forEach((h,i)=>r[h]=(vals[i]||'').trim());return r})}
-function num(v){return Number(String(v||'0').replace(/,/g,''))||0}
-function safe(v){return String(v??'').trim()}
-
-function parseDateValue(v){
-  const iso=normalizeDateValue(v);
-  if(!iso)return new Date('');
-  if(/^\d{4}-\d{2}-\d{2}$/.test(iso))return new Date(iso+'T00:00:00');
-  return new Date(iso);
-}
-function normalizeDateValue(v){
-  let s=safe(v).replace(/\uFEFF/g,'').trim();
-  if(!s)return '';
-
-  // Remove Excel-style time, e.g. 25/06/2026 00:00
-  s=s.split(/\s+\d{1,2}:\d{2}/)[0].trim();
-
-  // ISO: 2026-06-25
-  if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)){
-    const parts=s.split('-');
-    return `${parts[0]}-${String(parts[1]).padStart(2,'0')}-${String(parts[2]).padStart(2,'0')}`;
-  }
-
-  // UK/Excel: 25/06/2026, 25-06-2026, 25.06.2026, 25 06 2026
-  let m=s.match(/^(\d{1,2})[\/\-\.\s]+(\d{1,2})[\/\-\.\s]+(\d{4})$/);
-  if(m){
-    let a=Number(m[1]), b=Number(m[2]), y=m[3];
-    let d=a, mo=b;
-
-    // If second number is >12, treat as MM/DD/YYYY. Otherwise default DD/MM/YYYY.
-    if(a<=12 && b>12){ d=b; mo=a; }
-
-    return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-  }
-
-  // Compact: 25062026
-  m=s.match(/^(\d{2})(\d{2})(\d{4})$/);
-  if(m){
-    return `${m[3]}-${m[2]}-${m[1]}`;
-  }
-
-  const dt=new Date(s);
-  if(!isNaN(dt)){
-    const y=dt.getFullYear();
-    const mo=String(dt.getMonth()+1).padStart(2,'0');
-    const d=String(dt.getDate()).padStart(2,'0');
-    return `${y}-${mo}-${d}`;
-  }
-
-  return s;
-}
-function displayDateValue(v){
-  const s=safe(v);
-  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if(m)return `${m[3]}/${m[2]}/${m[1]}`;
-  return s;
-}
-
-function format(n){n=Number(n)||0;if(n>=1e9)return(n/1e9).toFixed(2).replace(/\.00$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(2).replace(/\.00$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace(/\.0$/,'')+'K';return n.toLocaleString()}
-function fmtFull(n){return (Number(n)||0).toLocaleString()}
-function set(id,v){document.getElementById(id).textContent=v}
-function target(g){return safe(g).toUpperCase()==='G9'?80000000:36000000}
-function initials(name){const p=safe(name).split(/\s+/).filter(Boolean);return p.length?p.slice(0,2).map(x=>x[0].toUpperCase()).join(''):'?'}
-function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ')}
-function badgeClass(status){if(status==='Met Target')return 'met';if(status==='No Participation')return 'zero';return 'fail'}
-function lifeClass(l){if(l==='New')return 'new';if(l==='Left')return 'left';if(l==='Returned')return 'returned';return 'exist'}
-function metricClass(v,has=true){if(!has)return'metric-none';if(v>0)return'metric-pos';if(v<0)return'metric-neg';return'metric-flat'}
-function failed(row){return !row || row.score===0 || row.score < row.target}
-function actionLabel(streak){if(streak>=3)return 'Action Required';if(streak===2)return 'Monitor';if(streak===1)return 'Warning';return 'No Action'}
-function actionClass(streak){if(streak>=3)return 'action';if(streak===2)return 'watch';if(streak===1)return 'fail';return 'met'}
-
-function normalize(){
-  rows=rows.map(r=>({
-    date:normalizeDateValue(r['Event Date']||r.EventDate||r['\uFEFFEventDate']||r.Date),
-    rank:num(r.Rank),
-    player:safe(r.Player||r.Name),
-    g:safe(r['G Level']||r.GLevel||r.G)||'Unknown',
-    score:num(r.Score||r.Points)
-  })).filter(r=>r.date&&r.player);
-  rows.forEach(r=>{r.target=target(r.g);r.gap=r.score-r.target;r.targetStatus=r.score===0?'No Participation':(r.score>=r.target?'Met Target':'Below Target')});
-  events=[...new Set(rows.map(r=>r.date))].sort((a,b)=>parseDateValue(a)-parseDateValue(b));
-  allPlayers=[...new Set(rows.map(r=>r.player))].sort((a,b)=>a.localeCompare(b));
-  selectedEvent=events[events.length-1]||null;
-}
-function playerHistory(player){return rows.filter(r=>r.player===player).sort((a,b)=>parseDateValue(a.date)-parseDateValue(b.date))}
-function lifecycle(player,date){
-  const idx=events.indexOf(date);
-  const present=rows.some(r=>r.date===date&&r.player===player);
-  const appearedBefore=rows.some(r=>parseDateValue(r.date)<parseDateValue(date)&&r.player===player);
-  const previousDate=idx>0?events[idx-1]:null;
-  const presentPrevious=previousDate?rows.some(r=>r.date===previousDate&&r.player===player):false;
-  if(present&&!appearedBefore)return 'New';
-  if(present&&appearedBefore&&!presentPrevious)return 'Returned';
-  if(present)return 'Existing';
-  if(!present&&appearedBefore)return 'Left';
-  return 'Not Yet Joined';
-}
-function failureStreak(player,date){
-  const idx=events.indexOf(date);
-  let streak=0;
-  for(let i=idx;i>=0;i--){
-    const d=events[i];
-    const r=rows.find(x=>x.date===d&&x.player===player);
-    if(r && failed(r)) streak++;
-    else break;
-  }
-  return streak;
-}
-function lastThreeFailures(player,date){
-  const idx=events.indexOf(date);
-  if(idx<2)return false;
-  for(let i=idx;i>=idx-2;i--){
-    const r=rows.find(x=>x.date===events[i]&&x.player===player);
-    if(!r || !failed(r))return false;
-  }
-  return true;
-}
-function eventView(date){
-  const present=rows.filter(r=>r.date===date);
-  const seenUntil=new Set(rows.filter(r=>parseDateValue(r.date)<=parseDateValue(date)).map(r=>r.player));
-  let view=[];
-  for(const p of seenUntil){
-    const row=present.find(r=>r.player===p);
-    const h=playerHistory(p).filter(r=>parseDateValue(r.date)<=parseDateValue(date));
-    const prev=h.length>1?h[h.length-2]:null;
-    const streak=failureStreak(p,date);
-    const repeat3=lastThreeFailures(p,date);
-    if(row){
-      view.push({...row,lifecycle:lifecycle(p,date),previousScore:prev?prev.score:null,change:prev?row.score-prev.score:null,eventsPlayed:h.length,totalPoints:h.reduce((s,x)=>s+x.score,0),failureStreak:streak,repeat3});
-    }else{
-      const last=h[h.length-1];
-      view.push({date,rank:null,player:p,g:last?last.g:'Unknown',score:null,target:target(last?last.g:'Unknown'),gap:null,targetStatus:'Left',lifecycle:'Left',previousScore:last?last.score:null,change:null,eventsPlayed:h.length,totalPoints:h.reduce((s,x)=>s+x.score,0),failureStreak:0,repeat3:false});
-    }
-  }
-  return view.sort((a,b)=>{if(a.repeat3&&!b.repeat3)return -1;if(!a.repeat3&&b.repeat3)return 1;if(a.lifecycle==='Left'&&b.lifecycle!=='Left')return 1;if(a.lifecycle!=='Left'&&b.lifecycle==='Left')return -1;return (b.score??-1)-(a.score??-1)})
-}
-function populate(){
-  const es=document.getElementById('eventSelect');
-  es.innerHTML=events.map(d=>`<option value="${d}">${displayDateValue(d)}</option>`).join('');
-  if(selectedEvent)es.value=selectedEvent;
-  const gs=[...new Set(rows.map(r=>r.g))].sort();
-  document.getElementById('gFilter').innerHTML='<option value="">All G Levels</option>'+gs.map(g=>`<option>${g}</option>`).join('');
-  updateNav();
-}
-function updateNav(){const i=events.indexOf(selectedEvent);document.getElementById('prevBtn').disabled=i<=0;document.getElementById('nextBtn').disabled=i<0||i>=events.length-1}
-function destroyChart(c){if(c)c.destroy()}
-function renderTrend(){
-  const ctx=document.getElementById('trendChart').getContext('2d');if(trendChart)trendChart.destroy();
-  const totals=events.map(d=>rows.filter(r=>r.date===d).reduce((s,r)=>s+r.score,0));
-  trendChart=new Chart(ctx,{type:'line',data:{labels:events.map(displayDateValue),datasets:[{data:totals,label:'Clan Total',borderColor:'#e9d5ff',backgroundColor:'rgba(192,132,252,.18)',fill:true,tension:.35,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#f3e8ff'}},y:{ticks:{color:'#f3e8ff',callback:v=>format(v)},grid:{color:'rgba(255,255,255,.08)'}}}}})
-}
-function renderTop(active){
-  const ctx=document.getElementById('topChart').getContext('2d');if(topChart)topChart.destroy();
-  const top=active.filter(r=>r.lifecycle!=='Left').sort((a,b)=>b.score-a.score).slice(0,10);
-  topChart=new Chart(ctx,{type:'bar',data:{labels:top.map(r=>r.player),datasets:[{data:top.map(r=>r.score),backgroundColor:['#f3e8ff','#e9d5ff','#d8b4fe','#c084fc','#a855f7','#9333ea','#7e22ce','#6b21a8','#581c87','#3b0764'],borderRadius:10}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#f3e8ff',callback:v=>format(v)},grid:{color:'rgba(255,255,255,.08)'}},y:{ticks:{color:'#f3e8ff'},grid:{display:false}}}}})
-}
-function renderG(active){
-  const ctx=document.getElementById('gChart').getContext('2d');if(gChart)gChart.destroy();
-  const act=active.filter(r=>r.lifecycle!=='Left');const gs=[...new Set(act.map(r=>r.g))].sort();
-  gChart=new Chart(ctx,{type:'bar',data:{labels:gs,datasets:[{label:'Met',data:gs.map(g=>act.filter(r=>r.g===g&&r.score>=r.target).length),backgroundColor:'rgba(53,210,138,.75)',borderRadius:8},{label:'Below',data:gs.map(g=>act.filter(r=>r.g===g&&r.score<r.target).length),backgroundColor:'rgba(255,107,125,.75)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#f3e8ff'}}},scales:{x:{ticks:{color:'#f3e8ff'},grid:{display:false}},y:{ticks:{color:'#f3e8ff'},grid:{color:'rgba(255,255,255,.08)'}}}}})
-}
-function renderDonut(active){
-  const ctx=document.getElementById('donutChart').getContext('2d');if(donutChart)donutChart.destroy();
-  const met=active.filter(r=>r.score>=r.target).length, below=active.filter(r=>r.score>0&&r.score<r.target).length, zero=active.filter(r=>r.score===0).length;
-  donutChart=new Chart(ctx,{type:'doughnut',data:{labels:['Met','Below','No Participation'],datasets:[{data:[met,below,zero],backgroundColor:['rgba(53,210,138,.8)','rgba(255,107,125,.8)','rgba(139,92,246,.7)'],borderColor:'rgba(255,255,255,.12)'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#f3e8ff'}}}}})
-}
-function renderLife(view){
-  const ctx=document.getElementById('lifeChart').getContext('2d');if(lifeChart)lifeChart.destroy();
-  const labels=['New','Existing','Returned','Left'];
-  const vals=labels.map(l=>view.filter(r=>r.lifecycle===l).length);
-  lifeChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:['rgba(250,204,21,.75)','rgba(53,210,138,.75)','rgba(192,132,252,.75)','rgba(255,107,125,.75)'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#f3e8ff'},grid:{display:false}},y:{ticks:{color:'#f3e8ff'},grid:{color:'rgba(255,255,255,.08)'}}}}})
-}
-function renderRisk(active){
-  const ctx=document.getElementById('riskChart').getContext('2d');if(riskChart)riskChart.destroy();
-  const repeat3=active.filter(r=>r.failureStreak>=3).length, watch2=active.filter(r=>r.failureStreak===2).length, warning1=active.filter(r=>r.failureStreak===1).length;
-  riskChart=new Chart(ctx,{type:'bar',data:{labels:['1x Warning','2x Watch','3x Action'],datasets:[{data:[warning1,watch2,repeat3],backgroundColor:['rgba(250,204,21,.55)','rgba(250,204,21,.8)','rgba(255,107,125,.85)'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#f3e8ff'},grid:{display:false}},y:{ticks:{color:'#f3e8ff'},grid:{color:'rgba(255,255,255,.08)'}}}}})
-}
-function renderList(id,items,empty){
-  const el=document.getElementById(id);
-  if(!items.length){el.innerHTML=`<li><span class="compact-name">${empty}</span><span class="compact-score">—</span><span class="badge met">None</span></li>`;return}
-  el.innerHTML=items.map(i=>`<li><span class="compact-name">${i.name}</span><span class="compact-score">${i.score}</span><span class="badge ${i.cls}">${i.badge}</span></li>`).join('')
-}
-function updateSummary(active,view,total,comp,repeat3Count){
-  const left=view.filter(r=>r.lifecycle==='Left').length, returned=view.filter(r=>r.lifecycle==='Returned').length, newCount=view.filter(r=>r.lifecycle==='New').length;
-  let health='Healthy', badge='Healthy', cls='met', action='Maintain Momentum';
-  if(comp<55 || repeat3Count>0){health='Needs Attention'; badge='Action Required'; cls='action'; action='Repeat Offender Review Required'}
-  else if(comp<70){health='Moderate Risk'; badge='Monitor'; cls='watch'; action='Coach Below-Target Players'}
-  set('execHealth',health);
-  const execNote = repeat3Count>0
-    ? `${repeat3Count} repeat offender(s) require leadership review.`
-    : (comp<70 ? `Compliance is ${comp}%; coaching is recommended.` : `Compliance is stable at ${comp}%.`);
-  set('execHealthNote',execNote);
-  set('summaryHealth',health); set('summaryBadge',badge); document.getElementById('summaryBadge').className='badge '+cls;
-  set('summaryAction',action);
-  set('summaryNarrative',`Selected event compliance is ${comp}% with ${active.length} active players and ${format(total)} total points. Movement shows ${newCount} new, ${returned} returned, and ${left} left players.`);
-  set('summaryActionText',repeat3Count>0?`${repeat3Count} player(s) have missed their required Tinman contribution target for three consecutive events. Review these members to understand participation challenges, reinforce expectations, and determine appropriate support or corrective action.`:'No 3-event repeat offenders on this selected date. Continue monitoring the 2-event watchlist to prevent recurring underperformance.');
-}
-function render(){
-  if(!selectedEvent)return;
-  set('latestEvent',displayDateValue(selectedEvent));
-  const view=eventView(selectedEvent);
-  const active=view.filter(r=>r.lifecycle!=='Left');
-  const search=safe(document.getElementById('searchInput').value).toLowerCase();
-  const gf=safe(document.getElementById('gFilter').value);
-  const sf=safe(document.getElementById('statusFilter').value);
-  const lf=safe(document.getElementById('lifeFilter').value);
-  const af=safe(document.getElementById('actionFilter').value);
-  let filtered=view.filter(r=>
-    (!search||r.player.toLowerCase().includes(search)) &&
-    (!gf||r.g===gf) &&
-    (!sf||(r.targetStatus===sf)) &&
-    (!lf||r.lifecycle===lf)
-  );
-  if(activeOnlyMode) filtered=filtered.filter(r=>r.lifecycle!=='Left');
-  if(af==='repeat3') filtered=filtered.filter(r=>r.failureStreak>=3);
-  if(af==='watch2') filtered=filtered.filter(r=>r.failureStreak===2);
-  if(af==='movement') filtered=filtered.filter(r=>['New','Left','Returned'].includes(r.lifecycle));
-  const total=active.reduce((s,r)=>s+(r.score||0),0);
-  const met=active.filter(r=>r.score>=r.target).length;
-  const below=active.filter(r=>r.score<r.target).length;
-  const comp=active.length?Math.round(met/active.length*100):0;
-  const repeat3=active.filter(r=>r.failureStreak>=3).length;
-  set('heroTotal',format(total));set('heroCompliance',comp+'%');set('kpiRegistered',view.length.toLocaleString());set('kpiActive',active.length.toLocaleString());
-  set('kpiLeft',view.filter(r=>r.lifecycle==='Left').length.toLocaleString());set('kpiReturned',view.filter(r=>r.lifecycle==='Returned').length.toLocaleString());
-  set('kpiTotal',format(total));set('kpiAvg',format(active.length?total/active.length:0));set('kpiMet',met.toLocaleString());set('kpiBelow',below.toLocaleString());set('kpiRepeat3',repeat3.toLocaleString());
-  updateSummary(active,view,total,comp,repeat3);
-
-  const tbody=document.getElementById('playerTable');
-  tbody.innerHTML=filtered.map(r=>{
-    const left=r.lifecycle==='Left';const hasPrev=r.previousScore!==null&&r.previousScore!==undefined;const ch=r.change;const action=actionLabel(r.failureStreak);
-    return `<tr class="${r.failureStreak>=3?'repeat-row':''}">
-    <td><div class="name-wrap"><div class="avatar">${initials(r.player)}</div><div class="player-link" onclick="openPlayer('${esc(r.player)}')">${r.player}</div></div></td>
-    <td>${r.g}</td><td><span class="badge ${lifeClass(r.lifecycle)}">${r.lifecycle}</span></td><td>${r.rank?'#'+r.rank:'—'}</td>
-    <td>${left?'—':fmtFull(r.score)}</td><td>${fmtFull(r.target)}</td>
-    <td class="${left?'metric-none':metricClass(r.gap,true)}">${left?'—':(r.gap>0?'+':'')+fmtFull(r.gap)}</td>
-    <td><span class="badge ${left?'left':badgeClass(r.targetStatus)}">${left?'Left':r.targetStatus}</span></td>
-    <td>${left?'—':r.failureStreak}</td><td><span class="badge ${actionClass(r.failureStreak)}">${left?'—':action}</span></td>
-    <td>${hasPrev?fmtFull(r.previousScore):'—'}</td><td class="${metricClass(ch,hasPrev&&!left)}">${hasPrev&&!left?((ch>0?'+':'')+fmtFull(ch)):'—'}</td>
-    <td>${r.eventsPlayed}</td><td>${fmtFull(r.totalPoints)}</td></tr>`
-  }).join('');
-
-  renderTop(active); renderG(active); renderDonut(active); renderLife(view); renderRisk(active);
-  renderList('repeatList',active.filter(r=>r.failureStreak>=3).sort((a,b)=>b.failureStreak-a.failureStreak||a.score-b.score).map(r=>({name:r.player,score:`${r.failureStreak} fails`,badge:'Action Required',cls:'action'})),'No 3x repeat offenders');
-  renderList('watchList',active.filter(r=>r.failureStreak===2).sort((a,b)=>a.score-b.score).map(r=>({name:r.player,score:format(r.score),badge:'Monitor',cls:'watch'})),'No 2-event watchlist');
-  renderList('belowList',active.filter(r=>r.score<r.target).sort((a,b)=>b.failureStreak-a.failureStreak||a.score-b.score).map(r=>({name:r.player,score:format(r.score),badge:r.targetStatus,cls:badgeClass(r.targetStatus)})),'No below-target players');
-  renderList('movementList',view.filter(r=>['Left','Returned','New'].includes(r.lifecycle)).map(r=>({name:r.player,score:r.g,badge:r.lifecycle,cls:lifeClass(r.lifecycle)})),'No movement records');
-  renderList('topList',active.slice().sort((a,b)=>b.score-a.score).slice(0,10).map((r,i)=>({name:`#${i+1} ${r.player}`,score:format(r.score),badge:r.g,cls:'met'})),'No top performers');
-  updateNav();
-}
-function openPlayer(player){
-  const h=playerHistory(player);document.getElementById('modalTitle').textContent=player;
-  const last=h[h.length-1];document.getElementById('modalSub').textContent=`G Level: ${last?last.g:'Unknown'} • Full Tinman history`;
-  set('hEvents',h.length.toLocaleString());set('hTotal',fmtFull(h.reduce((s,r)=>s+r.score,0)));set('hBestRank',h.length?'#'+Math.min(...h.map(r=>r.rank||999999)):'—');set('hBestScore',fmtFull(h.length?Math.max(...h.map(r=>r.score)):0));
-  set('hStreak',selectedEvent?failureStreak(player,selectedEvent):0);
-  document.getElementById('historyTable').innerHTML=h.slice().reverse().map(r=>{
-    const st=failureStreak(player,r.date);
-    return `<tr class="${st>=3?'repeat-row':''}"><td>${displayDateValue(r.date)}</td><td>#${r.rank}</td><td>${r.g}</td><td>${fmtFull(r.score)}</td><td>${fmtFull(r.target)}</td><td class="${metricClass(r.gap,true)}">${r.gap>0?'+':''}${fmtFull(r.gap)}</td><td><span class="badge ${badgeClass(r.targetStatus)}">${r.targetStatus}</span></td><td><span class="badge ${actionClass(st)}">${st}</span></td></tr>`
-  }).join('');
-  const ctx=document.getElementById('historyChart').getContext('2d');if(historyChart)historyChart.destroy();
-  historyChart=new Chart(ctx,{type:'line',data:{labels:h.map(r=>displayDateValue(r.date)),datasets:[{data:h.map(r=>r.score),label:'Score',borderColor:'#e9d5ff',backgroundColor:'rgba(192,132,252,.18)',fill:true,tension:.35,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#f3e8ff'}},y:{ticks:{color:'#f3e8ff',callback:v=>format(v)},grid:{color:'rgba(255,255,255,.08)'}}}}});
-  document.getElementById('modal').classList.add('show');document.getElementById('modal').setAttribute('aria-hidden','false')
-}
-function closeModal(){document.getElementById('modal').classList.remove('show');document.getElementById('modal').setAttribute('aria-hidden','true')}
-async function load(){
-  try{
-    const text=await fetch(DATA_URL+'?_ts='+Date.now()).then(r=>r.text());
-    rows=parseCSV(text);normalize();console.log('Tinman dates detected:',events);populate();renderTrend();render();
-  }catch(e){
-    console.error(e);
-    document.getElementById('playerTable').innerHTML=`<tr><td colspan="14">Failed to load ${DATA_URL}. Make sure index.html and tinman_raw.csv are in the same folder. Supported dates: YYYY-MM-DD or DD/MM/YYYY.</td></tr>`;
-  }
-}
-document.getElementById('eventSelect').addEventListener('change',e=>{selectedEvent=e.target.value;render()});
-document.getElementById('searchInput').addEventListener('input',render);
-document.getElementById('searchInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    render();
-    const section=document.getElementById('playerAnalysisSection');
-    if(section){section.scrollIntoView({behavior:'smooth',block:'start'});}
-  }
-});
-document.getElementById('gFilter').addEventListener('change',render);
-document.getElementById('statusFilter').addEventListener('change',render);
-document.getElementById('lifeFilter').addEventListener('change',render);
-document.getElementById('actionFilter').addEventListener('change',render);
-document.getElementById('resetFilters').addEventListener('click',()=>{['searchInput','gFilter','statusFilter','lifeFilter','actionFilter'].forEach(id=>document.getElementById(id).value='');activeOnlyMode=false;document.getElementById('memberViewBtn').textContent='View Player Analysis ↓';render()});
-document.getElementById('memberViewBtn').addEventListener('click',()=>{
-  const section=document.getElementById('playerAnalysisSection');
-  if(section){section.scrollIntoView({behavior:'smooth',block:'start'});}
-});
-document.getElementById('searchBtn').addEventListener('click',()=>{
-  render();
-  const section=document.getElementById('playerAnalysisSection');
-  if(section){section.scrollIntoView({behavior:'smooth',block:'start'});}
-});
-document.getElementById('clearSearchBtn').addEventListener('click',()=>{
-  document.getElementById('searchInput').value='';
-  render();
-});
-document.getElementById('prevBtn').addEventListener('click',()=>{const i=events.indexOf(selectedEvent);if(i>0){selectedEvent=events[i-1];document.getElementById('eventSelect').value=selectedEvent;render()}});
-document.getElementById('nextBtn').addEventListener('click',()=>{const i=events.indexOf(selectedEvent);if(i<events.length-1){selectedEvent=events[i+1];document.getElementById('eventSelect').value=selectedEvent;render()}});
-document.getElementById('modalClose').addEventListener('click',closeModal);
-document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-const topBtn=document.getElementById('backToTopBtn');
-window.addEventListener('scroll',()=>{if(window.scrollY>300)topBtn.classList.add('show');else topBtn.classList.remove('show')});
-topBtn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
-load();
+function parseCSV(text){const lines=(text||'').trim().split(/\r?\n/).filter(Boolean);if(!lines.length)return[];const h=parseCSVLine(lines[0]).map(x=>x.replace(/^\uFEFF/,'').trim());return lines.slice(1).map(line=>{const v=parseCSVLine(line);const r={};h.forEach((k,i)=>r[k]=(v[i]||'').trim());return r})}
+async function loadCSV(url){try{const r=await fetch(url+(url.includes('?')?'&':'?')+'_ts='+Date.now());if(!r.ok)throw new Error(url);return parseCSV(await r.text())}catch(e){console.warn('Could not load',url);return[]}}
+function safe(v){return String(v??'').trim()}function num(v){return Number(String(v||'0').replace(/,/g,''))||0}function fmt(n){n=Number(n)||0;if(n>=1e9)return(n/1e9).toFixed(2).replace(/\.00$/,'')+'B';if(n>=1e6)return(n/1e6).toFixed(2).replace(/\.00$/,'')+'M';if(n>=1e3)return(n/1e3).toFixed(1).replace(/\.0$/,'')+'K';return n.toLocaleString()}function fmtFull(n){return (Number(n)||0).toLocaleString()}function pct(x){return Math.round((Number(x)||0)*100)+'%'}function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v}function initials(name){const p=safe(name).split(/\s+/).filter(Boolean);return p.length?p.slice(0,2).map(x=>x[0].toUpperCase()).join(''):'?'}
+function normalizeDate(v){let s=safe(v);if(!s)return'';if(/^\d+(\.\d+)?$/.test(s)){const base=new Date(Date.UTC(1899,11,30));base.setUTCDate(base.getUTCDate()+Math.floor(Number(s)));return base.toISOString().slice(0,10)}s=s.split(/\s+\d{1,2}:\d{2}/)[0];if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)){const [y,m,d]=s.split('-');return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`}let m=s.match(/^(\d{1,2})[\/\-. ](\d{1,2})[\/\-. ](\d{4})$/);if(m){let d=+m[1],mo=+m[2],y=m[3];if(d<=12&&mo>12){d=+m[2];mo=+m[1]}return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`}const dt=new Date(s);return isNaN(dt)?s:dt.toISOString().slice(0,10)}
+function displayDate(d){const m=safe(d).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:d}function dval(d){return new Date(d+'T00:00:00')}
+function buildSettings(rows){const out={targets:{},vaultLevels:{},threshold:.6};rows.forEach(r=>{const g=safe(r.GLevel||r['G Level']||r.G).toUpperCase();if(!g)return;out.targets[g]=num(r['Tinman Minimum Target']||r.Target||r.Minimum);out.vaultLevels[g]=num(r['Vault Level']||r['Expected Vault Level']||r.Vault);if(r['Participation Threshold'])out.threshold=num(r['Participation Threshold'])||.6});return out}
+function target(g){return settings.targets[safe(g).toUpperCase()]||0}function expectedVault(g){return settings.vaultLevels[safe(g).toUpperCase()]||''}
+function badge(text,cls){return `<span class="badge ${cls}">${text}</span>`}function metricClass(v,has=true){if(!has)return'metric-none';if(v>0)return'metric-pos';if(v<0)return'metric-neg';return'metric-flat'}function lifeClass(l){return l==='New'?'new':l==='Left'?'left':l==='Returned'?'returned':'exist'}function statusClass(s){return s==='Met Target'?'met':s==='No Participation'?'zero':'fail'}function actionClass(s){return s>=3?'action':s===2?'watch':s===1?'fail':'met'}function actionLabel(s){return s>=3?'Action Required':s===2?'Monitor':s===1?'Warning':'No Action'}
+function normalizeAll(){players=players.map(r=>({player:safe(r.Player||r.Name),g:safe(r.GLevel||r['G Level']||r.G).toUpperCase()})).filter(r=>r.player);const map=new Map(players.map(p=>[p.player,p]));tinman=tinman.map(r=>{const p=safe(r.Player||r.Name),g=safe(r.GLevel||r['G Level']||map.get(p)?.g||r.G).toUpperCase(),score=num(r.Score||r.Points);let t=num(r.Target)||target(g);return{date:normalizeDate(r.EventDate||r['Event Date']||r.Date),rank:num(r.Rank),player:p,g,score,target:t,gap:score-t,result:safe(r.Result)||(score===0?'No Participation':score>=t?'Met Target':'Below Target')}}).filter(r=>r.date&&r.player);vaults=vaults.map(r=>{const p=safe(r.Player||r.Name),g=safe(r.GLevel||r['G Level']||map.get(p)?.g||r.G).toUpperCase(),level=num(r['Vault Level Built']||r['Vault Level']||r.Vault)||expectedVault(g);const builtRaw=safe(r['Built Vault']||r.Built);return{date:normalizeDate(r.EventDate||r['Event Date']||r.Date),rank:num(r.Rank),player:p,g,level,built:builtRaw?builtRaw.toLowerCase()!=='no':!!level,time:safe(r['Build Time']||r.Time),expected:num(r['Expected Vault Level'])||expectedVault(g)}}).filter(r=>r.date&&r.player);[...tinman,...vaults].forEach(r=>{if(!map.has(r.player)){map.set(r.player,{player:r.player,g:r.g});players.push({player:r.player,g:r.g})}});players.sort((a,b)=>a.player.localeCompare(b.player));events=[...new Set([...tinman.map(r=>r.date),...vaults.map(r=>r.date)])].sort((a,b)=>dval(a)-dval(b));selectedEvent=events[events.length-1]||''}
+function tinRow(player,date){return tinman.find(r=>r.player===player&&r.date===date)}function vaultRow(player,date){return vaults.find(r=>r.player===player&&r.date===date)}function eventIndex(){return events.indexOf(selectedEvent)}function windowEvents(){const v=document.getElementById('windowSelect')?.value||'10';if(v==='all')return events.slice(0,eventIndex()+1);const n=+v;return events.slice(Math.max(0,eventIndex()-n+1),eventIndex()+1)}
+function lifecycle(player,date){const present=!!tinRow(player,date);const appearedBefore=tinman.some(r=>r.player===player&&dval(r.date)<dval(date));const idx=events.indexOf(date);const prev=idx>0?events[idx-1]:null;const presentPrev=prev?!!tinRow(player,prev):false;if(present&&!appearedBefore)return'New';if(present&&appearedBefore&&!presentPrev)return'Returned';if(present)return'Existing';if(!present&&appearedBefore)return'Left';return'Not Yet Joined'}
+function tinStreak(player,g){let s=0;for(let i=eventIndex();i>=0;i--){const r=tinRow(player,events[i]);if(!r||r.score===0||r.score<target(g))s++;else break}return s}function vaultStreak(player){let s=0;for(let i=eventIndex();i>=0;i--){const r=vaultRow(player,events[i]);if(!r||!r.built)s++;else break}return s}function participation(player,type){const evs=windowEvents();if(!evs.length)return 0;let yes=0;evs.forEach(d=>{if(type==='tinman'){const r=tinRow(player,d);if(r&&r.score>0)yes++}else{const r=vaultRow(player,d);if(r&&r.built)yes++}});return yes/evs.length}
+function eventView(){const out=players.map(p=>{const tr=tinRow(p.player,selectedEvent),vr=vaultRow(p.player,selectedEvent);const hist=tinman.filter(r=>r.player===p.player&&dval(r.date)<=dval(selectedEvent)).sort((a,b)=>dval(a.date)-dval(b.date));const prev=hist.length>1?hist[hist.length-2]:null;const life=lifecycle(p.player,selectedEvent);const ts=tinStreak(p.player,p.g),vs=vaultStreak(p.player);const tp=participation(p.player,'tinman'),vp=participation(p.player,'vault');return{...p,tin:tr,vault:vr,life,prev,eventsPlayed:hist.length,totalPoints:hist.reduce((s,r)=>s+r.score,0),tinStreak:ts,vaultStreak:vs,tinPct:tp,vaultPct:vp,lowTin:tp<settings.threshold,lowVault:vp<settings.threshold,bothVault:vs>=3&&vp<settings.threshold,concern:(ts>=3||vs>=3||tp<settings.threshold||vp<settings.threshold)}});return out.sort((a,b)=>(b.concern-a.concern)||((b.tin?.score||-1)-(a.tin?.score||-1))||a.player.localeCompare(b.player))}
+function chart(id,type,data,opts={}){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),{type,data,options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#f3e8ff'}}},scales:{x:{ticks:{color:'#f3e8ff'},grid:{color:'rgba(255,255,255,.06)'}},y:{ticks:{color:'#f3e8ff'},grid:{color:'rgba(255,255,255,.08)'}}}},opts)})}
+function renderList(id,items,empty){const el=document.getElementById(id);if(!el)return;if(!items.length){el.innerHTML=`<li><span class="compact-name">${empty}</span><span class="compact-score">—</span><span class="badge met">None</span></li>`;return}el.innerHTML=items.map(i=>`<li><span class="compact-name">${i.name}</span><span class="compact-score">${i.score}</span><span class="badge ${i.cls}">${i.badge}</span></li>`).join('')}
+function filteredRows(rows){const search=safe(document.getElementById('searchInput').value).toLowerCase(),gf=safe(document.getElementById('gFilter').value),sf=safe(document.getElementById('statusFilter').value),cf=safe(document.getElementById('concernFilter').value);let f=rows.filter(r=>(!search||r.player.toLowerCase().includes(search))&&(!gf||r.g===gf)&&(!sf||(r.tin?.result||(!r.tin?'No Participation':''))===sf));if(cf==='repeat3')f=f.filter(r=>mode==='vault'?r.vaultStreak>=3:r.tinStreak>=3);if(cf==='lowpct')f=f.filter(r=>mode==='vault'?r.lowVault:r.lowTin);if(cf==='both')f=f.filter(r=>r.bothVault||(r.tinStreak>=3&&r.lowTin));if(cf==='movement')f=f.filter(r=>['New','Left','Returned'].includes(r.life));return f}
+function render(){if(!selectedEvent)return;set('latestEvent',displayDate(selectedEvent));const rows=eventView(),active=rows.filter(r=>r.life!=='Left'),frows=filteredRows(rows);const tinActive=active.filter(r=>r.tin),total=tinActive.reduce((s,r)=>s+r.tin.score,0),met=active.filter(r=>r.tin&&r.tin.score>=target(r.g)).length,below=active.length-met,vBuilt=active.filter(r=>r.vault&&r.vault.built).length,vMiss=active.length-vBuilt,comp=active.length?met/active.length:0,vp=active.length?vBuilt/active.length:0,tRepeat=active.filter(r=>r.tinStreak>=3).length,vRepeat=active.filter(r=>r.vaultStreak>=3).length,low=active.filter(r=>r.lowTin||r.lowVault).length,both=active.filter(r=>r.bothVault||(r.tinStreak>=3&&r.lowTin)).length;
+set('heroTotal',fmt(total));set('heroVault',pct(vp));set('kpiRegistered',players.length);set('kpiActive',tinActive.length);set('kpiLeft',rows.filter(r=>r.life==='Left').length);set('kpiReturned',rows.filter(r=>r.life==='Returned').length);set('kpiTotal',fmt(total));set('kpiAvg',fmt(tinActive.length?total/tinActive.length:0));set('kpiMet',met);set('kpiBelow',below);set('kpiRepeat3',tRepeat);set('kpiVaultBuilt',vBuilt);set('kpiVaultMiss',vMiss);set('kpiVaultPct',pct(vp));set('kpiAvgVault',vBuilt?Math.round(active.filter(r=>r.vault).reduce((s,r)=>s+(r.vault.level||0),0)/vBuilt):0);set('kpiVaultRepeat',vRepeat);set('kpiLowPct',low);set('kpiBoth',both);const times={};active.filter(r=>r.vault).forEach(r=>times[r.vault.time||'Not Captured']=(times[r.vault.time||'Not Captured']||0)+1);set('kpiTopTime',Object.entries(times).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—');set('kpiHighVault',Math.max(0,...active.filter(r=>r.vault).map(r=>r.vault.level||0))||'—');
+let health=(tRepeat||vRepeat||both)?'Needs Attention':(comp<.7||vp<.6?'Moderate Risk':'Healthy');set('execHealth',health);set('summaryHealth',health);set('summaryBadge',health);set('execHealthNote',`${tRepeat} Tinman repeat offender(s), ${vRepeat} vault repeat non-builder(s).`);set('summaryNarrative',`Selected event: Tinman compliance is ${pct(comp)} with ${fmt(total)} total points. Vault participation is ${pct(vp)}. Movement shows ${rows.filter(r=>r.life==='New').length} new, ${rows.filter(r=>r.life==='Returned').length} returned, and ${rows.filter(r=>r.life==='Left').length} left players.`);set('summaryAction',(tRepeat||vRepeat||both)?'Review Required':'Maintain Momentum');set('summaryActionText',(tRepeat||vRepeat||both)?`${tRepeat} Tinman repeat offender(s), ${vRepeat} vault repeat non-builder(s), and ${both} highest-priority members with both conditions. Start there first.`:'No major action flags for the selected event. Keep tracking consistently.');
+renderTinmanTable(frows);renderVaultTable(frows);renderCombinedTable(frows);renderCharts(rows,active);renderLists(rows,active);applyMode();updateNav();}
+function renderTinmanTable(rows){document.getElementById('playerTable').innerHTML=rows.map(r=>{const left=r.life==='Left',tr=r.tin,prev=r.prev,ch=tr&&prev?tr.score-prev.score:null,gap=tr?tr.score-target(r.g):null;return`<tr class="${r.tinStreak>=3?'repeat-row':''}"><td><div class="name-wrap"><div class="avatar">${initials(r.player)}</div><strong>${r.player}</strong></div></td><td>${r.g}</td><td>${badge(r.life,lifeClass(r.life))}</td><td>${tr?.rank?'#'+tr.rank:'—'}</td><td>${tr?fmtFull(tr.score):'—'}</td><td>${fmtFull(target(r.g))}</td><td class="${metricClass(gap,!!tr)}">${tr?((gap>0?'+':'')+fmtFull(gap)):'—'}</td><td>${badge(tr?.result||'No Participation',statusClass(tr?.result||'No Participation'))}</td><td>${left?'—':r.tinStreak}</td><td>${badge(left?'—':actionLabel(r.tinStreak),actionClass(r.tinStreak))}</td><td>${prev?fmtFull(prev.score):'—'}</td><td class="${metricClass(ch,!!ch)}">${ch===null?'—':(ch>0?'+':'')+fmtFull(ch)}</td><td>${r.eventsPlayed}</td><td>${fmtFull(r.totalPoints)}</td></tr>`}).join('')}
+function renderVaultTable(rows){document.getElementById('vaultTable').innerHTML=rows.map(r=>`<tr class="${r.vaultStreak>=3?'repeat-row':''}"><td><div class="name-wrap"><div class="avatar">${initials(r.player)}</div><strong>${r.player}</strong></div></td><td>${r.g}</td><td>${expectedVault(r.g)||'—'}</td><td>${r.vault?.level||'—'}</td><td>${r.vault?badge('Built','met'):badge('Not Built','fail')}</td><td>${r.vault?.time||'—'}</td><td>${r.vaultStreak}</td><td>${pct(r.vaultPct)}</td><td>${r.bothVault?badge('Both','action'):r.vaultStreak>=3?badge('3 Fails','action'):r.lowVault?badge('Low %','watch'):badge('OK','met')}</td></tr>`).join('')}
+function renderCombinedTable(rows){document.getElementById('combinedTable').innerHTML=rows.map(r=>`<tr class="${r.concern?'repeat-row':''}"><td><div class="name-wrap"><div class="avatar">${initials(r.player)}</div><strong>${r.player}</strong></div></td><td>${r.g}</td><td>${fmt(r.tin?.score||0)}</td><td>${badge(r.tin?.result||'No Participation',statusClass(r.tin?.result||'No Participation'))}</td><td>${r.tinStreak}</td><td>${pct(r.tinPct)}</td><td>${r.vault?badge('Built','met'):badge('Not Built','fail')}</td><td>${r.vault?.level||expectedVault(r.g)||'—'}</td><td>${r.vault?.time||'—'}</td><td>${r.vaultStreak}</td><td>${pct(r.vaultPct)}</td><td>${r.bothVault?badge('Both','action'):r.concern?badge('Review','watch'):badge('OK','met')}</td></tr>`).join('')}
+function renderCharts(rows,active){chart('donutChart','doughnut',{labels:['Met','Below','No Participation'],datasets:[{data:[active.filter(r=>r.tin&&r.tin.score>=target(r.g)).length,active.filter(r=>r.tin&&r.tin.score<target(r.g)&&r.tin.score>0).length,active.filter(r=>!r.tin||r.tin.score===0).length],backgroundColor:['rgba(53,210,138,.8)','rgba(255,107,125,.8)','rgba(139,92,246,.7)']}]},{scales:{}});chart('lifeChart','bar',{labels:['New','Existing','Returned','Left'],datasets:[{data:['New','Existing','Returned','Left'].map(l=>rows.filter(r=>r.life===l).length),backgroundColor:['rgba(250,204,21,.75)','rgba(53,210,138,.75)','rgba(192,132,252,.75)','rgba(255,107,125,.75)'],borderRadius:8}]},{plugins:{legend:{display:false}}});chart('riskChart','bar',{labels:['1x Warning','2x Watch','3x Action'],datasets:[{data:[active.filter(r=>r.tinStreak===1).length,active.filter(r=>r.tinStreak===2).length,active.filter(r=>r.tinStreak>=3).length],backgroundColor:['rgba(250,204,21,.55)','rgba(250,204,21,.8)','rgba(255,107,125,.85)'],borderRadius:8}]},{plugins:{legend:{display:false}}});chart('trendChart','line',{labels:events.map(displayDate),datasets:[{label:'Clan Total',data:events.map(d=>tinman.filter(r=>r.date===d).reduce((s,r)=>s+r.score,0)),borderColor:'#e9d5ff',backgroundColor:'rgba(192,132,252,.18)',fill:true,tension:.35}]},{scales:{y:{ticks:{color:'#f3e8ff',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,.08)'}},x:{ticks:{color:'#f3e8ff'},grid:{color:'rgba(255,255,255,.06)'}}}});const gs=[...new Set(players.map(p=>p.g))].sort();chart('gChart','bar',{labels:gs,datasets:[{label:'Met',data:gs.map(g=>active.filter(r=>r.g===g&&r.tin&&r.tin.score>=target(g)).length),backgroundColor:'rgba(53,210,138,.75)',borderRadius:8},{label:'Below',data:gs.map(g=>active.filter(r=>r.g===g&&(!r.tin||r.tin.score<target(g))).length),backgroundColor:'rgba(255,107,125,.75)',borderRadius:8}]});const top=active.filter(r=>r.tin).sort((a,b)=>b.tin.score-a.tin.score).slice(0,10);chart('topChart','bar',{labels:top.map(r=>r.player),datasets:[{data:top.map(r=>r.tin.score),backgroundColor:['#f3e8ff','#e9d5ff','#d8b4fe','#c084fc','#a855f7','#9333ea','#7e22ce','#6b21a8','#581c87','#3b0764'],borderRadius:10}]},{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#f3e8ff',callback:v=>fmt(v)},grid:{color:'rgba(255,255,255,.08)'}},y:{ticks:{color:'#f3e8ff'},grid:{display:false}}}});
+chart('vaultDonut','doughnut',{labels:['Built','Not Built'],datasets:[{data:[active.filter(r=>r.vault).length,active.filter(r=>!r.vault).length],backgroundColor:['rgba(53,210,138,.8)','rgba(255,107,125,.8)']}]},{scales:{}});const lvl={};active.filter(r=>r.vault).forEach(r=>lvl[r.vault.level]=(lvl[r.vault.level]||0)+1);chart('vaultLevelChart','bar',{labels:Object.keys(lvl),datasets:[{label:'Players',data:Object.values(lvl),backgroundColor:'rgba(192,132,252,.75)',borderRadius:8}]},{plugins:{legend:{display:false}}});chart('vaultRiskChart','bar',{labels:['1x Warning','2x Watch','3x Action'],datasets:[{data:[active.filter(r=>r.vaultStreak===1).length,active.filter(r=>r.vaultStreak===2).length,active.filter(r=>r.vaultStreak>=3).length],backgroundColor:['rgba(250,204,21,.55)','rgba(250,204,21,.8)','rgba(255,107,125,.85)'],borderRadius:8}]},{plugins:{legend:{display:false}}});chart('vaultTrend','line',{labels:events.map(displayDate),datasets:[{label:'Vault Participation %',data:events.map(d=>players.length?vaults.filter(v=>v.date===d).length/players.length*100:0),borderColor:'#35d28a',backgroundColor:'rgba(53,210,138,.16)',fill:true,tension:.35}]},{scales:{y:{ticks:{color:'#f3e8ff',callback:v=>Math.round(v)+'%'},grid:{color:'rgba(255,255,255,.08)'}},x:{ticks:{color:'#f3e8ff'},grid:{color:'rgba(255,255,255,.06)'}}}});const times={};vaults.filter(v=>v.date===selectedEvent).forEach(v=>times[v.time||'Not Captured']=(times[v.time||'Not Captured']||0)+1);chart('vaultTime','doughnut',{labels:Object.keys(times),datasets:[{data:Object.values(times),backgroundColor:['#35d28a','#c084fc','#a855f7','#facc15','#ff6b7d','#8b5cf6']}]},{scales:{}});const vb=active.filter(r=>r.vault).sort((a,b)=>(b.vault.level-a.vault.level)||(a.vault.rank-b.vault.rank)).slice(0,10);chart('vaultBuilderChart','bar',{labels:vb.map(r=>r.player),datasets:[{data:vb.map(r=>r.vault.level),backgroundColor:'rgba(53,210,138,.75)',borderRadius:10}]},{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#f3e8ff'},grid:{color:'rgba(255,255,255,.08)'}},y:{ticks:{color:'#f3e8ff'},grid:{display:false}}}})}
+function renderLists(rows,active){renderList('repeatList',active.filter(r=>r.tinStreak>=3).map(r=>({name:r.player,score:`${r.tinStreak} fails`,badge:'Action Required',cls:'action'})),'No Tinman repeat offenders');renderList('watchList',active.filter(r=>r.tinStreak===2).map(r=>({name:r.player,score:fmt(r.tin?.score||0),badge:'Monitor',cls:'watch'})),'No 2-event watchlist');renderList('movementList',rows.filter(r=>['New','Left','Returned'].includes(r.life)).map(r=>({name:r.player,score:r.g,badge:r.life,cls:lifeClass(r.life)})),'No movement records');renderList('belowList',active.filter(r=>!r.tin||r.tin.score<target(r.g)).map(r=>({name:r.player,score:fmt(r.tin?.score||0),badge:r.tin?.result||'No Participation',cls:statusClass(r.tin?.result||'No Participation')})),'No below-target players');renderList('topList',active.filter(r=>r.tin).sort((a,b)=>b.tin.score-a.tin.score).slice(0,10).map((r,i)=>({name:`#${i+1} ${r.player}`,score:fmt(r.tin.score),badge:r.g,cls:'met'})),'No top performers');renderList('vaultRepeatList',active.filter(r=>r.vaultStreak>=3).map(r=>({name:r.player,score:`${r.vaultStreak} fails`,badge:'Action Required',cls:'action'})),'No vault repeat non-builders');renderList('vaultWatchList',active.filter(r=>r.vaultStreak===2).map(r=>({name:r.player,score:pct(r.vaultPct),badge:'Monitor',cls:'watch'})),'No vault watchlist');renderList('vaultStrongList',active.filter(r=>r.vaultPct>=.8).map(r=>({name:r.player,score:pct(r.vaultPct),badge:'Builder',cls:'met'})),'No strong builders yet')}
+function applyMode(){document.querySelectorAll('.tinman-section,.vault-section,.combined-section').forEach(e=>e.classList.remove('hidden'));if(mode==='tinman'){document.querySelectorAll('.vault-section,.combined-section,#vaultKpis').forEach(e=>e.classList.add('hidden'));document.getElementById('tinmanKpis').classList.remove('hidden')}else if(mode==='vault'){document.querySelectorAll('.tinman-section,.combined-section,#tinmanKpis').forEach(e=>e.classList.add('hidden'));document.getElementById('vaultKpis').classList.remove('hidden')}else{document.getElementById('tinmanKpis').classList.remove('hidden');document.getElementById('vaultKpis').classList.remove('hidden')}}function updateNav(){const i=eventIndex();document.getElementById('prevBtn').disabled=i<=0;document.getElementById('nextBtn').disabled=i<0||i>=events.length-1}
+function populate(){document.getElementById('eventSelect').innerHTML=events.map(d=>`<option value="${d}">${displayDate(d)}</option>`).join('');document.getElementById('eventSelect').value=selectedEvent;const gs=[...new Set(players.map(p=>p.g))].sort();document.getElementById('gFilter').innerHTML='<option value="">All G Levels</option>'+gs.map(g=>`<option>${g}</option>`).join('')}
+async function init(){const [p,s,t,v]=await Promise.all([loadCSV(CONFIG.playersUrl),loadCSV(CONFIG.settingsUrl),loadCSV(CONFIG.tinmanUrl),loadCSV(CONFIG.vaultsUrl)]);players=p;settings=buildSettings(s);tinman=t;vaults=v;normalizeAll();populate();render()}
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mode=btn.dataset.mode;render()}));['eventSelect','windowSelect','gFilter','statusFilter','concernFilter','searchInput'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{if(id==='eventSelect')selectedEvent=e.target.value;render()}));document.getElementById('resetFilters').addEventListener('click',()=>{['searchInput','gFilter','statusFilter','concernFilter'].forEach(id=>document.getElementById(id).value='');render()});document.getElementById('prevBtn').addEventListener('click',()=>{const i=eventIndex();if(i>0){selectedEvent=events[i-1];document.getElementById('eventSelect').value=selectedEvent;render()}});document.getElementById('nextBtn').addEventListener('click',()=>{const i=eventIndex();if(i<events.length-1){selectedEvent=events[i+1];document.getElementById('eventSelect').value=selectedEvent;render()}});init();
 </script>
 </body>
 </html>
